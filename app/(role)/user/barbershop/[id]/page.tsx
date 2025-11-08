@@ -57,7 +57,7 @@ export default async function BarbershopDetailPage({
                             className='absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105'
                             style={{ backgroundImage: `url(${heroImage})` }}
                         />
-                        <div className='absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent' />
+                        <div className='absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent' />
 
                         {/* Mobile Navigation */}
                         <div className='absolute inset-x-0 top-0 flex items-center justify-between px-5 pt-5 lg:hidden'>
@@ -164,7 +164,7 @@ export default async function BarbershopDetailPage({
                         {barbershop.services.map((service, index) => (
                             <div
                                 key={service.name}
-                                className='group relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-card to-muted/20 p-5 shadow-sm transition-all hover:shadow-md hover:border-primary/30'
+                                className='group relative overflow-hidden rounded-xl border border-border/50 bg-linear-to-br from-card to-muted/20 p-5 shadow-sm transition-all hover:shadow-md hover:border-primary/30'
                             >
                                 <div className='absolute top-0 right-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-primary/5 blur-2xl transition-transform group-hover:scale-150' />
                                 <div className='relative space-y-4'>
@@ -376,7 +376,7 @@ export default async function BarbershopDetailPage({
                             </p>
                         </div>
                         <Link
-                            href={`/booking/${barbershop.id}`}
+                            href={`/user/booking/${barbershop.id}`}
                             className='flex-1 lg:flex-none'
                         >
                             <Button className='w-full justify-center gap-2 rounded-lg bg-primary px-8 py-6 text-base font-semibold text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl lg:py-3'>

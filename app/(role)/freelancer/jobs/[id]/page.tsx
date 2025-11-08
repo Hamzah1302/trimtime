@@ -66,7 +66,7 @@ type BookingDetail = {
     };
     service: {
         name: string;
-        barber: string;
+        freelancer: string;
         notes: string;
         channel: string;
     };
@@ -92,143 +92,319 @@ type BookingDetail = {
 };
 
 const bookingDetails: Record<string, BookingDetail> = {
-    "tt-3021": {
-        id: "TT-3021",
-        externalId: "INV-9041",
+    "hs-9921": {
+        id: "HS-9921",
+        externalId: "INV-HS-9921",
         status: "pending",
-        statusLabel: "Menunggu check-in",
+        statusLabel: "Menunggu konfirmasi keberangkatan",
         customer: {
-            name: "Dimas Saputra",
-            initials: "DS",
+            name: "Mira Aulia",
+            initials: "MA",
             phone: "0812-8890-1122",
-            location: "Menara BCA, Jakarta",
-            memberSince: "Agustus 2023",
+            location: "Verde 2 Residence, Kuningan",
+            memberSince: "Januari 2024",
         },
         schedule: {
             date: "Selasa, 11 Feb 2025",
-            time: "09:00 WIB",
-            duration: "60 menit",
-            room: "Kursi 2 • Area Signature Fade",
+            time: "08:30 WIB",
+            duration: "45 menit",
+            room: "Lobby Verde 2 • akses lift tamu",
         },
         service: {
-            name: "Signature Fade + Steam",
-            barber: "Rama Putra",
-            notes: "Tambahkan steam therapy 10 menit. Pelanggan suka finishing matte.",
-            channel: "Walk-in",
+            name: "Signature Home Grooming",
+            freelancer: "Naya Pratama",
+            notes: "Bawa kursi lipat & cape ekstra. Pelanggan minta styling matte.",
+            channel: "Home visit",
         },
         payment: {
             items: [
-                { name: "Skin Fade Premium", price: 65000 },
-                { name: "Steam Therapy", price: 20000 },
+                { name: "Signature Home Grooming", price: 320000 },
+                { name: "Biaya perjalanan zona 2", price: 40000 },
             ],
-            subtotal: 85000,
-            discount: 8500,
-            total: 76500,
-            promoCode: "TRIM10",
-            method: "QRIS (diproses saat check-out)",
+            subtotal: 360000,
+            discount: 0,
+            total: 360000,
+            method: "Transfer saat sesi selesai",
             tip: "Belum diatur",
-            status: "Menunggu pembayaran",
+            status: "Menunggu konfirmasi pelanggan",
         },
         timeline: [
             {
-                time: "08:30",
+                time: "07:45",
                 title: "Reminder dikirim",
                 description:
-                    "Sistem mengirim notifikasi WhatsApp otomatis ke pelanggan.",
+                    "Sistem mengirim WhatsApp otomatis ke pelanggan terkait estimasi kedatangan.",
                 icon: BadgeCheck,
             },
             {
-                time: "08:45",
-                title: "Check-in belum diterima",
+                time: "08:00",
+                title: "Freelancer standby",
                 description:
-                    "Pelanggan belum konfirmasi kedatangan. Siapkan tim front desk.",
+                    "Periksa alat portable & pastikan alamat sudah di-set di maps.",
                 icon: Clock,
             },
             {
-                time: "09:00",
-                title: "Estimasi sesi dimulai",
+                time: "08:20",
+                title: "Estimasi berangkat",
                 description:
-                    "Barber siap di kursi. Update status saat pelanggan tiba.",
+                    "Update status begitu meninggalkan basecamp agar pelanggan siap menerima.",
                 icon: CalendarClock,
                 status: "upcoming",
             },
         ],
         progress: 25,
-        actionLabel: "Konfirmasi kehadiran",
+        actionLabel: "Konfirmasi keberangkatan",
     },
-    "inv-9041": {
-        id: "INV-9041",
-        externalId: "TT-3021",
-        status: "pending",
-        statusLabel: "Menunggu konfirmasi",
+    "hs-9922": {
+        id: "HS-9922",
+        externalId: "INV-HS-9922",
+        status: "confirmed",
+        statusLabel: "Siap mulai di kantor klien",
         customer: {
-            name: "Dimas Saputra",
-            initials: "DS",
-            phone: "0812-8890-1122",
-            location: "TrimTime HQ, SCBD",
-            memberSince: "Agustus 2023",
+            name: "Satrio Pramana",
+            initials: "SP",
+            phone: "0813-2200-4422",
+            location: "CoHive Citylofts, Sudirman",
+            memberSince: "Mei 2023",
         },
         schedule: {
             date: "Selasa, 11 Feb 2025",
-            time: "09:00 WIB",
-            duration: "60 menit",
-            room: "Kursi 2 • Area Signature Fade",
+            time: "10:00 WIB",
+            duration: "40 menit",
+            room: "Ruang rapat Lantai 3 • akses resepsionis",
         },
         service: {
-            name: "Signature Fade + Steam",
-            barber: "Rama Putra",
-            notes: "Tambahkan steam therapy 10 menit. Pelanggan suka finishing matte.",
-            channel: "Walk-in",
+            name: "Office Pop-up Session",
+            freelancer: "Naya Pratama",
+            notes: "Client minta latar belakang branding untuk konten reels kantor.",
+            channel: "Office event",
         },
         payment: {
             items: [
-                { name: "Skin Fade Premium", price: 65000 },
-                { name: "Steam Therapy", price: 20000 },
+                { name: "Office Pop-up Session", price: 275000 },
+                { name: "Transport zona 1", price: 30000 },
             ],
-            subtotal: 85000,
-            discount: 8500,
-            total: 76500,
-            promoCode: "TRIM10",
-            method: "QRIS (diproses saat check-out)",
+            subtotal: 305000,
+            discount: 5000,
+            total: 300000,
+            promoCode: "LOYAL5",
+            method: "QRIS kantor",
             tip: "Belum diatur",
-            status: "Menunggu pembayaran",
+            status: "Siap ditagihkan",
         },
         timeline: [
             {
-                time: "08:30",
-                title: "Reminder dikirim",
+                time: "09:20",
+                title: "Peralatan siap",
                 description:
-                    "Sistem mengirim notifikasi WhatsApp otomatis ke pelanggan.",
+                    "Blow dryer portable & micellar spray sudah dicek.",
                 icon: BadgeCheck,
             },
             {
-                time: "08:45",
-                title: "Check-in belum diterima",
-                description:
-                    "Pelanggan belum konfirmasi kedatangan. Siapkan tim front desk.",
+                time: "09:40",
+                title: "Menuju lokasi",
+                description: "Perjalanan menuju Sudirman ± 15 menit.",
                 icon: Clock,
             },
             {
-                time: "09:00",
-                title: "Estimasi sesi dimulai",
-                description:
-                    "Barber siap di kursi. Update status saat pelanggan tiba.",
+                time: "09:55",
+                title: "Briefing resepsionis",
+                description: "Serah terima kartu akses lalu mulai setup.",
                 icon: CalendarClock,
                 status: "upcoming",
             },
         ],
-        progress: 25,
-        actionLabel: "Konfirmasi kehadiran",
+        progress: 55,
+        actionLabel: "Mulai sesi kantor",
+    },
+    "hs-9923": {
+        id: "HS-9923",
+        externalId: "INV-HS-9923",
+        status: "ongoing",
+        statusLabel: "Home service sedang berjalan",
+        customer: {
+            name: "Reyhan Fadil",
+            initials: "RF",
+            phone: "0812-9988-7744",
+            location: "Menara BCA Lt. 32",
+            memberSince: "Juli 2022",
+        },
+        schedule: {
+            date: "Selasa, 11 Feb 2025",
+            time: "12:30 WIB",
+            duration: "60 menit",
+            room: "Lift karyawan • parkir B2 disediakan",
+        },
+        service: {
+            name: "Executive Home Service",
+            freelancer: "Naya Pratama",
+            notes: "Tambahkan essential oil favorit pelanggan & foto progress.",
+            channel: "Home visit",
+        },
+        payment: {
+            items: [
+                { name: "Executive Home Service", price: 420000 },
+                { name: "Biaya perjalanan zona 2", price: 40000 },
+            ],
+            subtotal: 460000,
+            discount: 20000,
+            total: 440000,
+            promoCode: "TRIM10",
+            method: "E-wallet (dibayar di awal)",
+            tip: "Belum diatur",
+            status: "Dalam sesi",
+        },
+        timeline: [
+            {
+                time: "12:10",
+                title: "Check-in keamanan",
+                description:
+                    "Kartu visitor sudah di-scan, tinggal naik ke lantai 32.",
+                icon: BadgeCheck,
+            },
+            {
+                time: "12:25",
+                title: "Setup alat",
+                description: "Mat ras & lighting portable sudah siap.",
+                icon: Clock,
+            },
+            {
+                time: "12:30",
+                title: "Sesi dimulai",
+                description: "Update status selesai jika layanan rampung.",
+                icon: CalendarClock,
+                status: "upcoming",
+            },
+        ],
+        progress: 70,
+        actionLabel: "Tandai sesi selesai",
+    },
+    "hs-9924": {
+        id: "HS-9924",
+        externalId: "INV-HS-9924",
+        status: "done",
+        statusLabel: "Selesai • siap minta rating",
+        customer: {
+            name: "Vino Mahardika",
+            initials: "VM",
+            phone: "0813-6655-2200",
+            location: "Apartemen Botanica, Permata Hijau",
+            memberSince: "September 2021",
+        },
+        schedule: {
+            date: "Selasa, 11 Feb 2025",
+            time: "15:00 WIB",
+            duration: "90 menit",
+            room: "Tower Selatan • akses lobby private",
+        },
+        service: {
+            name: "Family Grooming Pack",
+            freelancer: "Naya Pratama",
+            notes: "2 dewasa + 1 anak. Sediakan cape anak & boneka kecil.",
+            channel: "Home visit",
+        },
+        payment: {
+            items: [
+                { name: "Family Grooming Pack", price: 540000 },
+                { name: "Biaya perjalanan zona 3", price: 50000 },
+            ],
+            subtotal: 590000,
+            discount: 0,
+            total: 590000,
+            method: "Transfer full (DP lunas)",
+            tip: "Rp 50.000 (tunai)",
+            status: "Sudah dibayar",
+        },
+        timeline: [
+            {
+                time: "14:45",
+                title: "Sesi berakhir",
+                description: "Pelanggan menyetujui hasil styling.",
+                icon: BadgeCheck,
+            },
+            {
+                time: "14:50",
+                title: "Peralatan dibersihkan",
+                description: "Semua cape & alat disteril ulang.",
+                icon: Clock,
+            },
+            {
+                time: "14:55",
+                title: "Kirim permintaan rating",
+                description: "Reminder otomatis akan terkirim via WhatsApp.",
+                icon: CalendarClock,
+                status: "upcoming",
+            },
+        ],
+        progress: 100,
+        actionLabel: "Kirim permintaan rating",
+    },
+    "hs-9925": {
+        id: "HS-9925",
+        externalId: "INV-HS-9925",
+        status: "pending",
+        statusLabel: "Menunggu DP pelanggan",
+        customer: {
+            name: "Indra Syahputra",
+            initials: "IS",
+            phone: "0817-5522-3311",
+            location: "Cluster Kemang Pratama",
+            memberSince: "November 2023",
+        },
+        schedule: {
+            date: "Selasa, 11 Feb 2025",
+            time: "17:00 WIB",
+            duration: "45 menit",
+            room: "Pos keamanan • akses mobil disediakan",
+        },
+        service: {
+            name: "Nomad Groom Basic",
+            freelancer: "Naya Pratama",
+            notes: "Klien baru, minta dokumentasi foto sebelum-sesudah.",
+            channel: "Home visit",
+        },
+        payment: {
+            items: [{ name: "Nomad Groom Basic", price: 280000 }],
+            subtotal: 280000,
+            discount: 0,
+            total: 280000,
+            method: "DP 50% via transfer",
+            tip: "Belum diatur",
+            status: "Menunggu DP",
+        },
+        timeline: [
+            {
+                time: "16:00",
+                title: "Reminder DP",
+                description: "Sistem mengirim link pembayaran otomatis.",
+                icon: BadgeCheck,
+            },
+            {
+                time: "16:20",
+                title: "Tunggu konfirmasi",
+                description: "Hubungi pelanggan jika belum respon.",
+                icon: Clock,
+            },
+            {
+                time: "16:40",
+                title: "Estimasi berangkat",
+                description: "Aktif segera setelah DP masuk.",
+                icon: CalendarClock,
+                status: "upcoming",
+            },
+        ],
+        progress: 15,
+        actionLabel: "Verifikasi DP",
     },
 };
 
-type BarberBookingDetailPageProps = {
+type FreelancerBookingDetailPageProps = {
     params: Promise<{ id: string }>;
 };
 
-export default async function BarberBookingDetailPage({
+export default async function FreelancerBookingDetailPage({
     params,
-}: BarberBookingDetailPageProps) {
+}: FreelancerBookingDetailPageProps) {
     const { id } = await params;
     const bookingKey = id?.toLowerCase?.() ?? "";
     const booking = bookingDetails[bookingKey];
@@ -239,7 +415,7 @@ export default async function BarberBookingDetailPage({
         ? `62${phoneDigits.slice(1)}`
         : phoneDigits;
     const telHref = normalizedPhone ? `tel:+${normalizedPhone}` : undefined;
-    const bookingBasePath = `/barber/booking/${id}`;
+    const bookingBasePath = `/freelancer/jobs/${id}`;
 
     return (
         <PageShell background='soft' contentClassName='gap-0'>
@@ -249,7 +425,7 @@ export default async function BarberBookingDetailPage({
                     <div className='flex flex-wrap items-center justify-between gap-4'>
                         <div className='flex items-center gap-3'>
                             <Link
-                                href='/barber/booking'
+                                href='/freelancer/jobs'
                                 className='inline-flex items-center gap-2 rounded-full border border-border/50 bg-background/80 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground'
                             >
                                 <ArrowLeft className='h-3.5 w-3.5' />
@@ -393,7 +569,7 @@ export default async function BarberBookingDetailPage({
                                             <p className='text-xs text-muted-foreground'>
                                                 Kelola komunikasi dan update
                                                 status pelanggan langsung dari
-                                                dashboard barber.
+                                                dashboard freelancer.
                                             </p>
                                         </div>
                                         <div className='mt-4 grid gap-2 sm:grid-cols-2'>
@@ -495,7 +671,8 @@ export default async function BarberBookingDetailPage({
                                                 {booking.service.name}
                                             </p>
                                             <p className='text-xs text-muted-foreground'>
-                                                Barber: {booking.service.barber}
+                                                Freelancer:{" "}
+                                                {booking.service.freelancer}
                                             </p>
                                             <Separator className='my-3' />
                                             <p className='text-xs leading-relaxed text-muted-foreground'>
@@ -731,7 +908,7 @@ export default async function BarberBookingDetailPage({
                         </CardHeader>
                         <CardContent>
                             <Button asChild>
-                                <Link href='/barber/booking'>
+                                <Link href='/freelancer/jobs'>
                                     Kembali ke daftar booking
                                 </Link>
                             </Button>

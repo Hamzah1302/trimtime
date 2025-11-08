@@ -1,3 +1,5 @@
+"use client";
+
 import { Building2, IdCard, ShieldCheck } from "lucide-react";
 
 import { RoleLoginTemplate } from "../_components/role-login-template";
@@ -44,6 +46,12 @@ const secondaryActions = [
   }
 ];
 
+const mockCredentials = {
+  email: "admin@trimtime.id",
+  password: "admin123",
+  passkey: "TRIM-OPS"
+};
+
 export default function AdminLoginPage() {
   return (
     <RoleLoginTemplate
@@ -55,7 +63,15 @@ export default function AdminLoginPage() {
       loginFields={loginFields}
       submitLabel="Masuk dashboard admin"
       secondaryActions={secondaryActions}
-      footerNote={<p>Pastikan kamu sudah menyalakan VPN atau koneksi aman kantor TrimTime.</p>}
+      mockCredentials={mockCredentials}
+      successRedirect="/admin/dashboard"
+      errorMessage="Akses admin ditolak. Pastikan email, sandi, dan kode internal sesuai."
+      footerNote={
+        <p>
+          Demo akun: <span className="font-semibold text-foreground">admin@trimtime.id / admin123</span> (Kode internal: TRIM-OPS).
+          Pastikan kamu sudah menyalakan VPN atau koneksi aman kantor TrimTime.
+        </p>
+      }
     />
   );
 }

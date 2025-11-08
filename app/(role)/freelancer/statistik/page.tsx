@@ -102,7 +102,7 @@ const ratingSources = [
         platform: "Walk-in Feedback",
         rating: 4.7,
         reviews: 56,
-        highlight: "Suka suasana barbershop",
+        highlight: "Suka pengalaman home service",
     },
 ] as const;
 
@@ -128,7 +128,7 @@ const weeklyChartConfig = {
     },
 } satisfies ChartConfig;
 
-export default function BarberStatistikPage() {
+export default function FreelancerStatistikPage() {
     return (
         <PageShell background='soft' contentClassName='gap-0'>
             <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
@@ -139,10 +139,10 @@ export default function BarberStatistikPage() {
                             <Avatar className='h-12 w-12 border-2 border-primary/40 shadow-lg'>
                                 <AvatarImage
                                     src='/placeholder.jpg'
-                                    alt='Rama Putra'
+                                    alt='Naya Pratama'
                                 />
                                 <AvatarFallback className='bg-primary/10 text-sm font-semibold text-primary'>
-                                    RP
+                                    NP
                                 </AvatarFallback>
                             </Avatar>
                             <div className='space-y-1.5'>
@@ -151,20 +151,20 @@ export default function BarberStatistikPage() {
                                         variant='outline'
                                         className='border-border/60 bg-muted/20 text-[9px] font-semibold uppercase tracking-widest text-muted-foreground'
                                     >
-                                        Barber
+                                        Freelancer
                                     </Badge>
                                     <Badge
                                         variant='outline'
                                         className='border-border/60 bg-muted/20 text-[9px] font-semibold uppercase tracking-widest text-muted-foreground'
                                     >
-                                        Barber-Owner
+                                        Home Service
                                     </Badge>
                                 </div>
                                 <p className='text-sm text-muted-foreground'>
-                                    Barber
+                                    Mobile Grooming Specialist
                                 </p>
                                 <h2 className='text-xl font-bold tracking-tight text-foreground'>
-                                    Rama Putra
+                                    Naya Pratama
                                 </h2>
                             </div>
                         </div>
@@ -206,7 +206,7 @@ export default function BarberStatistikPage() {
                                 Insight Performa
                             </div>
                             <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
-                                Statistik pendapatan & rating barber
+                                Statistik pendapatan & rating freelancer
                             </h1>
                             <p className='max-w-2xl text-sm text-muted-foreground lg:text-base'>
                                 Analisis pendapatan harian, tren mingguan, dan
@@ -437,7 +437,7 @@ export default function BarberStatistikPage() {
                                 <p className='mt-1 leading-relaxed'>
                                     Permintaan home service meningkat 15%
                                     setelah promo “TrimTime Anywhere” berjalan.
-                                    Pertimbangkan untuk menambah slot barber
+                                    Pertimbangkan untuk menambah slot freelancer
                                     mobile di akhir pekan.
                                 </p>
                             </div>
@@ -521,7 +521,7 @@ export default function BarberStatistikPage() {
                                 </p>
                                 <p className='mt-1 leading-relaxed'>
                                     Permintaan meningkat di area Sudirman &
-                                    Kuningan. Atur barber cadangan pada jam
+                                    Kuningan. Atur freelancer cadangan pada jam
                                     sibuk sore.
                                 </p>
                             </div>

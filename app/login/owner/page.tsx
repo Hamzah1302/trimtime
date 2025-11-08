@@ -1,3 +1,5 @@
+"use client";
+
 import { Briefcase, Crown, ShieldCheck } from "lucide-react";
 
 import { RoleLoginTemplate } from "../_components/role-login-template";
@@ -44,6 +46,12 @@ const secondaryActions = [
   }
 ];
 
+const mockCredentials = {
+  email: "owner@trimtime.id",
+  password: "owner123",
+  "outlet-code": "TRIM-001"
+};
+
 export default function OwnerLoginPage() {
   return (
     <RoleLoginTemplate
@@ -55,10 +63,22 @@ export default function OwnerLoginPage() {
       loginFields={loginFields}
       submitLabel="Masuk dashboard owner"
       secondaryActions={secondaryActions}
+      mockCredentials={mockCredentials}
+      successRedirect="/owner/dashboard"
+      errorMessage="Kredensial owner tidak valid. Coba cek email, sandi, atau kode outlet."
       footerNote={
-        <p>
-          Butuh bantuan verifikasi? Hubungi tim TrimTime melalui email <a className="text-primary" href="mailto:support@trimtime.id">support@trimtime.id</a>.
-        </p>
+        <div className="space-y-1 text-muted-foreground">
+          <p>
+            Demo akun: <span className="font-semibold text-foreground">owner@trimtime.id / owner123</span> (Kode outlet: TRIM-001)
+          </p>
+          <p>
+            Butuh bantuan verifikasi? Hubungi tim TrimTime melalui email{" "}
+            <a className="text-primary" href="mailto:support@trimtime.id">
+              support@trimtime.id
+            </a>
+            .
+          </p>
+        </div>
       }
     />
   );

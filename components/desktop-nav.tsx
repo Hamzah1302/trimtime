@@ -4,13 +4,25 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
     BarChart3,
+    Building2,
     ClipboardList,
+    Crown,
+    Headphones,
+    Gift,
+    LogOut,
     MapPin,
+    MessageCircle,
+    Megaphone,
     PanelsTopLeft,
     Settings2,
+    ShoppingBag,
+    ShieldCheck,
+    TrendingUp,
+    UserCog,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { appNavItems } from "./bottom-nav";
@@ -23,10 +35,42 @@ const barberNavItems = [
     { href: "/barber/pengaturan", label: "Pengaturan", icon: Settings2 },
 ] as const;
 
+const freelancerNavItems = [
+    { href: "/freelancer/dashboard", label: "Dashboard", icon: PanelsTopLeft },
+    { href: "/freelancer/jobs", label: "Daftar Job", icon: ClipboardList },
+    { href: "/freelancer/home-service", label: "Home Service", icon: MapPin },
+    { href: "/freelancer/statistik", label: "Statistik", icon: BarChart3 },
+    { href: "/freelancer/pengaturan", label: "Pengaturan", icon: Settings2 },
+] as const;
+
+const ownerNavItems = [
+    { href: "/owner/dashboard", label: "Dashboard", icon: PanelsTopLeft },
+    { href: "/owner/cabang", label: "Cabang", icon: Building2 },
+    { href: "/owner/barber", label: "Manajemen Barber", icon: UserCog },
+    { href: "/owner/laporan", label: "Laporan & Keuangan", icon: BarChart3 },
+    { href: "/owner/promo", label: "Promo & Loyalitas", icon: Gift },
+    { href: "/owner/store", label: "Mini Store", icon: ShoppingBag },
+    { href: "/owner/review", label: "Review Monitoring", icon: MessageCircle },
+    { href: "/owner/premium", label: "TrimTime Premium", icon: Crown },
+] as const;
+
+const adminNavItems = [
+    { href: "/admin/dashboard", label: "Dashboard", icon: PanelsTopLeft },
+    { href: "/admin/akun", label: "Manajemen Akun", icon: ShieldCheck },
+    { href: "/admin/transaksi", label: "Monitoring Transaksi", icon: BarChart3 },
+    { href: "/admin/cms", label: "CMS & Konten", icon: Megaphone },
+    { href: "/admin/analytics", label: "Analytics & Insight", icon: TrendingUp },
+    { href: "/admin/iklan", label: "Iklan & Partner", icon: Building2 },
+    { href: "/admin/support", label: "Customer Support", icon: Headphones },
+    { href: "/admin/keamanan", label: "Audit & Keamanan", icon: ShieldCheck },
+] as const;
+
 export function DesktopNav() {
     const pathname = usePathname();
     const isBarberRoute = pathname?.startsWith("/barber") ?? false;
-    const isUserRoute = pathname?.startsWith("/user") ?? false;
+    const isFreelancerRoute = pathname?.startsWith("/freelancer") ?? false;
+    const isOwnerRoute = pathname?.startsWith("/owner") ?? false;
+    const isAdminRoute = pathname?.startsWith("/admin") ?? false;
 
     return (
         <aside className='hidden border-r border-border/50 bg-card shadow-sm lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-80 lg:overflow-y-auto'>
@@ -36,7 +80,7 @@ export function DesktopNav() {
                         href='/user/homepage'
                         className='group flex items-center gap-3'
                     >
-                        <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg transition-transform group-hover:scale-105'>
+                        <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-primary to-primary/80 shadow-lg transition-transform group-hover:scale-105'>
                             <svg
                                 className='h-6 w-6 text-primary-foreground'
                                 fill='none'
@@ -60,7 +104,7 @@ export function DesktopNav() {
                             </p>
                         </div>
                     </Link>
-                    <div className='relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-primary/5 to-accent/5 p-4 shadow-sm'>
+                    <div className='relative overflow-hidden rounded-xl border border-border/50 bg-linear-to-br from-primary/5 to-accent/5 p-4 shadow-sm'>
                         <div className='absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/10 blur-2xl' />
                         <div className='relative flex items-center gap-3'>
                             <Avatar className='h-12 w-12 border-2 border-background shadow-md ring-2 ring-primary/20'>
@@ -84,7 +128,10 @@ export function DesktopNav() {
                     </div>
                 </div>
                 <nav className='flex flex-1 flex-col gap-1.5'>
-                    {!isBarberRoute && (
+                    {!isBarberRoute &&
+                        !isFreelancerRoute &&
+                        !isOwnerRoute &&
+                        !isAdminRoute && (
                         <>
                             <p className='px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
                                 Menu
@@ -122,93 +169,165 @@ export function DesktopNav() {
                             })}
                         </>
                     )}
-                    {!isUserRoute && (
-                        <div
-                            className={cn(
-                                !isBarberRoute ? "mt-6" : "",
-                                "space-y-1.5"
-                            )}
-                        >
+                    {isBarberRoute && (
+                        <div className='mt-6 space-y-1.5'>
                             <p className='px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
                                 Barber Panel
                             </p>
-                            {barberNavItems.map(
-                                ({ href, label, icon: Icon }) => {
-                                    const isActive =
-                                        pathname === href ||
-                                        pathname?.startsWith(`${href}/`);
+                            {barberNavItems.map(({ href, label, icon: Icon }) => {
+                                const isActive =
+                                    pathname === href ||
+                                    pathname?.startsWith(`${href}/`);
 
-                                    return (
-                                        <Link key={href} href={href}>
-                                            <span
+                                return (
+                                    <Link key={href} href={href}>
+                                        <span
+                                            className={cn(
+                                                "group relative flex w-full items-center gap-3 overflow-hidden rounded-lg px-4 py-3 text-sm font-semibold transition-all",
+                                                isActive
+                                                    ? "bg-primary text-primary-foreground shadow-md"
+                                                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                                            )}
+                                        >
+                                            {isActive && (
+                                                <span className='absolute inset-y-0 left-0 w-1 rounded-r-full bg-primary-foreground' />
+                                            )}
+                                            <Icon
                                                 className={cn(
-                                                    "group relative flex w-full items-center gap-3 overflow-hidden rounded-lg px-4 py-3 text-sm font-semibold transition-all",
+                                                    "h-5 w-5 transition-transform",
                                                     isActive
-                                                        ? "bg-primary text-primary-foreground shadow-md"
-                                                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                                                        ? ""
+                                                        : "group-hover:scale-110"
                                                 )}
-                                            >
-                                                {isActive && (
-                                                    <span className='absolute inset-y-0 left-0 w-1 rounded-r-full bg-primary-foreground' />
+                                            />
+                                            <span>{label}</span>
+                                        </span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    )}
+                    {isFreelancerRoute && (
+                        <div className='mt-6 space-y-1.5'>
+                            <p className='px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
+                                Freelancer Panel
+                            </p>
+                            {freelancerNavItems.map(({ href, label, icon: Icon }) => {
+                                const isActive =
+                                    pathname === href ||
+                                    pathname?.startsWith(`${href}/`);
+
+                                return (
+                                    <Link key={href} href={href}>
+                                        <span
+                                            className={cn(
+                                                "group relative flex w-full items-center gap-3 overflow-hidden rounded-lg px-4 py-3 text-sm font-semibold transition-all",
+                                                isActive
+                                                    ? "bg-primary text-primary-foreground shadow-md"
+                                                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                                            )}
+                                        >
+                                            {isActive && (
+                                                <span className='absolute inset-y-0 left-0 w-1 rounded-r-full bg-primary-foreground' />
+                                            )}
+                                            <Icon
+                                                className={cn(
+                                                    "h-5 w-5 transition-transform",
+                                                    isActive
+                                                        ? ""
+                                                        : "group-hover:scale-110"
                                                 )}
-                                                <Icon
-                                                    className={cn(
-                                                        "h-5 w-5 transition-transform",
-                                                        isActive
-                                                            ? ""
-                                                            : "group-hover:scale-110"
-                                                    )}
-                                                />
-                                                <span>{label}</span>
-                                            </span>
-                                        </Link>
-                                    );
-                                }
-                            )}
+                                            />
+                                            <span>{label}</span>
+                                        </span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    )}
+                    {isOwnerRoute && (
+                        <div className='mt-6 space-y-1.5'>
+                            <p className='px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
+                                Owner Panel
+                            </p>
+                            {ownerNavItems.map(({ href, label, icon: Icon }) => {
+                                const isActive =
+                                    pathname === href ||
+                                    pathname?.startsWith(`${href}/`);
+
+                                return (
+                                    <Link key={href} href={href}>
+                                        <span
+                                            className={cn(
+                                                "group relative flex w-full items-center gap-3 overflow-hidden rounded-lg px-4 py-3 text-sm font-semibold transition-all",
+                                                isActive
+                                                    ? "bg-primary text-primary-foreground shadow-md"
+                                                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                                            )}
+                                        >
+                                            {isActive && (
+                                                <span className='absolute inset-y-0 left-0 w-1 rounded-r-full bg-primary-foreground' />
+                                            )}
+                                            <Icon
+                                                className={cn(
+                                                    "h-5 w-5 transition-transform",
+                                                    isActive
+                                                        ? ""
+                                                        : "group-hover:scale-110"
+                                                )}
+                                            />
+                                            <span>{label}</span>
+                                        </span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    )}
+                    {isAdminRoute && (
+                        <div className='mt-6 space-y-1.5'>
+                            <p className='px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
+                                Admin Panel
+                            </p>
+                            {adminNavItems.map(({ href, label, icon: Icon }) => {
+                                const isActive =
+                                    pathname === href ||
+                                    pathname?.startsWith(`${href}/`);
+
+                                return (
+                                    <Link key={href} href={href}>
+                                        <span
+                                            className={cn(
+                                                "group relative flex w-full items-center gap-3 overflow-hidden rounded-lg px-4 py-3 text-sm font-semibold transition-all",
+                                                isActive
+                                                    ? "bg-primary text-primary-foreground shadow-md"
+                                                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                                            )}
+                                        >
+                                            {isActive && (
+                                                <span className='absolute inset-y-0 left-0 w-1 rounded-r-full bg-primary-foreground' />
+                                            )}
+                                            <Icon
+                                                className={cn(
+                                                    "h-5 w-5 transition-transform",
+                                                    isActive
+                                                        ? ""
+                                                        : "group-hover:scale-110"
+                                                )}
+                                            />
+                                            <span>{label}</span>
+                                        </span>
+                                    </Link>
+                                );
+                            })}
                         </div>
                     )}
                 </nav>
-                <div className='relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 to-accent/10 p-4 shadow-sm'>
-                    <div className='absolute -right-6 -bottom-6 h-20 w-20 rounded-full bg-primary/20 blur-2xl' />
-                    <div className='relative space-y-2'>
-                        <div className='inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-2.5 py-1 text-xs font-bold text-primary'>
-                            <svg
-                                className='h-3 w-3'
-                                fill='currentColor'
-                                viewBox='0 0 20 20'
-                            >
-                                <path d='M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z' />
-                            </svg>
-                            Promo Spesial
-                        </div>
-                        <p className='text-sm font-bold leading-snug text-foreground'>
-                            Tetap Rapi Sepanjang Minggu! ✨
-                        </p>
-                        <p className='text-xs leading-relaxed text-muted-foreground'>
-                            Temukan promo terbaru dan jadwalkan styling favorit
-                            kamu sekarang.
-                        </p>
-                        <Link
-                            href='/promo'
-                            className='inline-flex items-center gap-1 text-xs font-bold text-primary transition-colors hover:text-primary/80'
-                        >
-                            Lihat Promo
-                            <svg
-                                className='h-3 w-3'
-                                fill='none'
-                                viewBox='0 0 24 24'
-                                stroke='currentColor'
-                            >
-                                <path
-                                    strokeLinecap='round'
-                                    strokeLinejoin='round'
-                                    strokeWidth={2}
-                                    d='M9 5l7 7-7 7'
-                                />
-                            </svg>
-                        </Link>
-                    </div>
-                </div>
+                <Button variant='outline' className='mt-2 w-full border-border/60 text-sm font-semibold' asChild>
+                    <Link href='/login' className='flex items-center justify-center gap-2'>
+                        <LogOut className='h-4 w-4' />
+                        Keluar
+                    </Link>
+                </Button>
             </div>
         </aside>
     );

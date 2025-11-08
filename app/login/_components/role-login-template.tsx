@@ -1,13 +1,23 @@
+"use client";
+
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import type { FormEvent, ReactNode } from "react";
+import { useState } from "react";
 
 import type { LucideIcon } from "lucide-react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+type SubmitResult = {
+  success: boolean;
+  message?: string;
+  redirect?: string;
+};
 
 type LoginField = {
   id: string;
@@ -39,6 +49,10 @@ export type RoleLoginTemplateProps = {
   secondaryActions?: SecondaryAction[];
   footerNote?: ReactNode;
   children?: ReactNode;
+  mockCredentials?: Record<string, string>;
+  successRedirect?: string;
+  errorMessage?: string;
+  onSubmit?: (values: Record<string, string>) => Promise<SubmitResult> | SubmitResult;
 };
 
 export function RoleLoginTemplate({
@@ -52,8 +66,63 @@ export function RoleLoginTemplate({
   submitIcon: SubmitIcon,
   secondaryActions = [],
   footerNote,
-  children
+  children,
+  mockCredentials,
+  successRedirect,
+  errorMessage,
+  onSubmit
 }: RoleLoginTemplateProps) {
+  const router = useRouter();
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    const values: Record<string, string> = {};
+    loginFields.forEach(({ id }) => {
+      const value = formData.get(id);
+      values[id] = typeof value === "string" ? value.trim() : "";
+    });
+
+    setSubmitting(true);
+    setFormError(null);
+
+    try {
+      let result: SubmitResult | void | undefined = undefined;
+
+      if (onSubmit) {
+        result = await onSubmit(values);
+      } else if (mockCredentials && successRedirect) {
+        const isValid = Object.entries(mockCredentials).every(([key, expected]) => {
+          return (values[key] ?? "") === expected;
+        });
+        result = isValid
+          ? { success: true, redirect: successRedirect }
+          : { success: false, message: errorMessage ?? "Kredensial tidak sesuai. Silakan coba lagi." };
+      }
+
+      if (result?.success) {
+        if (result.redirect) {
+          router.push(result.redirect);
+        }
+      } else if (result) {
+        setFormError(result.message ?? errorMessage ?? "Kredensial tidak sesuai. Silakan coba lagi.");
+      } else if (!result && successRedirect) {
+        router.push(successRedirect);
+      }
+    } catch (error) {
+      console.error(error);
+      setFormError(errorMessage ?? "Terjadi kesalahan. Coba lagi.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <PageShell background="plain" containerClassName="pb-16" contentClassName="gap-10">
       <div className="mx-auto w-full max-w-xl space-y-6">
@@ -94,7 +163,7 @@ export function RoleLoginTemplate({
             </div>
           </header>
 
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-4">
               {loginFields.map(({ id, label, type = "text", placeholder, autoComplete, description: fieldDescription, required }) => (
                 <div key={id} className="space-y-2">
@@ -109,6 +178,7 @@ export function RoleLoginTemplate({
                     autoComplete={autoComplete}
                     required={required}
                     className="rounded-xl border-border"
+                    defaultValue={mockCredentials?.[id] ?? ""}
                   />
                   {fieldDescription ? (
                     <p className="text-xs text-muted-foreground">{fieldDescription}</p>
@@ -117,9 +187,20 @@ export function RoleLoginTemplate({
               ))}
             </div>
 
-            <Button type="submit" className="w-full justify-center gap-2">
-              {submitLabel}
-              {SubmitIcon ? <SubmitIcon className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+            {formError ? <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive">{formError}</p> : null}
+
+            <Button type="submit" className="w-full justify-center gap-2" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  Memproses
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </>
+              ) : (
+                <>
+                  {submitLabel}
+                  {SubmitIcon ? <SubmitIcon className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+                </>
+              )}
             </Button>
           </form>
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowRight, MessageCircle, UserRound } from "lucide-react";
 
 import { RoleLoginTemplate } from "../_components/role-login-template";
@@ -35,6 +37,11 @@ const secondaryActions = [
   }
 ];
 
+const mockCredentials = {
+  email: "user@trimtime.id",
+  password: "user123"
+};
+
 export default function UserLoginPage() {
   return (
     <RoleLoginTemplate
@@ -47,7 +54,17 @@ export default function UserLoginPage() {
       submitLabel="Masuk sebagai pelanggan"
       submitIcon={ArrowRight}
       secondaryActions={secondaryActions}
-      footerNote={<p>Lupa kata sandi? Pilih opsi OTP WhatsApp untuk reset cepat.</p>}
+      mockCredentials={mockCredentials}
+      successRedirect="/user/homepage"
+      errorMessage="Email atau kata sandi pelanggan tidak cocok."
+      footerNote={
+        <div className="space-y-1">
+          <p>Lupa kata sandi? Pilih opsi OTP WhatsApp untuk reset cepat.</p>
+          <p className="text-muted-foreground">
+            Demo akun: <span className="font-semibold text-foreground">user@trimtime.id / user123</span>
+          </p>
+        </div>
+      }
     />
   );
 }

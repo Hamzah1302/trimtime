@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { BottomNav } from "@/components/bottom-nav";
-import { DesktopNav } from "@/components/desktop-nav";
+import { AppShell } from "@/components/layout/app-shell";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -30,19 +29,7 @@ export default function RootLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <div className='flex min-h-screen bg-muted/30 text-foreground'>
-                    <DesktopNav />
-                    <div className='flex min-h-screen flex-1 flex-col'>
-                        <div className='relative flex flex-1 flex-col'>
-                            <main className='mx-auto flex w-full max-w-7xl flex-1 flex-col px-0 pb-20 text-foreground lg:px-6 lg:py-6 lg:pb-8'>
-                                <div className=' rounded-none bg-background shadow-none lg:rounded-2xl lg:border lg:border-border/50 lg:shadow-sm lg:backdrop-blur-sm'>
-                                    {children}
-                                </div>
-                            </main>
-                        </div>
-                        <BottomNav className='lg:hidden' />
-                    </div>
-                </div>
+                <AppShell>{children}</AppShell>
             </body>
         </html>
     );

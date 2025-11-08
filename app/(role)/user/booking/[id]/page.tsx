@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
     ArrowLeft,
@@ -49,38 +49,52 @@ const bookingData = {
     estimate: { price: 65000, duration: "35 menit" },
 };
 
-const schedule = [
-    {
-        date: "2025-11-01",
-        label: "Sabtu, 1 Nov",
-        slots: [
-            { time: "09:00", available: true, barbers: [1, 2] },
-            { time: "10:30", available: true, barbers: [1] },
-            { time: "13:00", available: false, barbers: [] },
-            { time: "15:30", available: true, barbers: [2, 3] },
-        ],
-    },
-    {
-        date: "2025-01-16",
-        label: "Kamis, 16 Jan",
-        slots: [
-            { time: "09:30", available: true, barbers: [2] },
-            { time: "11:00", available: true, barbers: [1, 3] },
-            { time: "14:30", available: true, barbers: [1, 2, 3] },
-            { time: "16:00", available: false, barbers: [] },
-        ],
-    },
-    {
-        date: "2025-01-17",
-        label: "Jumat, 17 Jan",
-        slots: [
-            { time: "10:00", available: true, barbers: [3] },
-            { time: "12:30", available: true, barbers: [1, 2] },
-            { time: "17:00", available: true, barbers: [2, 3] },
-            { time: "19:00", available: false, barbers: [] },
-        ],
-    },
+const scheduleSlotTemplates: Array<
+    Array<{ time: string; available: boolean; barbers: number[] }>
+> = [
+    [
+        { time: "09:00", available: true, barbers: [1, 2] },
+        { time: "10:30", available: true, barbers: [1] },
+        { time: "13:00", available: false, barbers: [] },
+        { time: "15:30", available: true, barbers: [2, 3] },
+    ],
+    [
+        { time: "09:30", available: true, barbers: [2] },
+        { time: "11:00", available: true, barbers: [1, 3] },
+        { time: "14:30", available: true, barbers: [1, 2, 3] },
+        { time: "16:00", available: false, barbers: [] },
+    ],
+    [
+        { time: "10:00", available: true, barbers: [3] },
+        { time: "12:30", available: true, barbers: [1, 2] },
+        { time: "17:00", available: true, barbers: [2, 3] },
+        { time: "19:00", available: false, barbers: [] },
+    ],
 ];
+
+const formatScheduleLabel = (date: Date) =>
+    new Intl.DateTimeFormat("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "short",
+    })
+        .format(date)
+        .replaceAll(".", "");
+
+const schedule = scheduleSlotTemplates.map((slots, index) => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + index);
+
+    return {
+        date: date.toISOString().split("T")[0],
+        label: formatScheduleLabel(date),
+        slots: slots.map((slot) => ({
+            ...slot,
+            barbers: [...slot.barbers],
+        })),
+    };
+});
 
 const barbers = [
     {
@@ -103,8 +117,10 @@ const barbers = [
     },
 ];
 
-export default function BookingPage({ params }: { params: { id: string } }) {
+export default function BookingPage() {
     const router = useRouter();
+    const params = useParams<{ id: string }>();
+    const bookingId = params?.id ?? "";
     const [serviceType, setServiceType] = useState<"in-shop" | "home">(
         "in-shop"
     );
@@ -217,21 +233,22 @@ export default function BookingPage({ params }: { params: { id: string } }) {
             paramsObj.append("note", customerNote);
         }
 
-        router.push(`/payment/${params.id}?${paramsObj.toString()}`);
+        if (!bookingId) return;
+        router.push(`/user/payment/${bookingId}?${paramsObj.toString()}`);
     };
 
     return (
         <PageShell background='hero' contentClassName='gap-6'>
             <header className='flex items-center justify-between rounded-xl border border-border/50 bg-card/95 px-5 py-4 shadow-sm backdrop-blur-sm lg:hidden'>
                 <Link
-                    href={`/barbershop/${params.id}`}
+                    href={`/user/barbershop/${bookingId}`}
                     className='inline-flex items-center gap-1.5 rounded-lg border border-border/50 bg-background px-3 py-2 text-xs font-medium text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground'
                 >
                     <ArrowLeft className='h-3.5 w-3.5' />
                     Kembali
                 </Link>
                 <span className='rounded-lg border border-border/50 bg-muted px-3 py-2 text-xs font-medium text-muted-foreground shadow-sm'>
-                    Booking #{params.id}
+                    {bookingId ? `Booking #${bookingId}` : "Booking"}
                 </span>
             </header>
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { MailPlus, MessageCircle, Scissors } from "lucide-react";
 
 import { RoleLoginTemplate } from "../_components/role-login-template";
@@ -44,6 +46,12 @@ const secondaryActions = [
   }
 ];
 
+const mockCredentials = {
+  email: "barber@trimtime.id",
+  password: "barber123",
+  "invite-code": "TRIM-BRB"
+};
+
 export default function BarberLoginPage() {
   return (
     <RoleLoginTemplate
@@ -55,7 +63,15 @@ export default function BarberLoginPage() {
       loginFields={loginFields}
       submitLabel="Masuk dashboard barber"
       secondaryActions={secondaryActions}
-      footerNote={<p>Gunakan email kerja yang terdaftar oleh owner kamu di TrimTime.</p>}
+      mockCredentials={mockCredentials}
+      successRedirect="/barber/dashboard"
+      errorMessage="Email, sandi, atau kode undangan barber tidak sesuai."
+      footerNote={
+        <p>
+          Demo akun: <span className="font-semibold text-foreground">barber@trimtime.id / barber123</span> (Kode undangan: TRIM-BRB).
+          Gunakan email kerja yang terdaftar oleh owner kamu di TrimTime.
+        </p>
+      }
     />
   );
 }
