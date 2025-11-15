@@ -1,16 +1,8 @@
 "use client";
 
-import {
-    BadgeCheck,
-    Briefcase,
-    CalendarClock,
-    Mail,
-    MapPin,
-    Plus,
-    Send,
-    ShieldCheck,
-    UserRound,
-} from "lucide-react";
+import Link from "next/link";
+
+import { CalendarClock, Mail, Pencil, Plus, Send, ShieldCheck, UserRound } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,12 +12,10 @@ import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Table,
     TableBody,
@@ -35,41 +25,12 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-const barberList = [
-    {
-        name: "Rama Putra",
-        branch: "SCBD",
-        level: "Lead Stylist",
-        status: "Aktif",
-        shift: "10:00 - 18:00",
-    },
-    {
-        name: "Hafidz Rahman",
-        branch: "Menteng",
-        level: "Senior",
-        status: "Cuti",
-        shift: "12:00 - 20:00",
-    },
-    {
-        name: "Yoga Mahendra",
-        branch: "BSD",
-        level: "Junior",
-        status: "Aktif",
-        shift: "11:00 - 19:00",
-    },
-] as const;
-
-const skills = [
-    "Skin fade",
-    "Beard sculpting",
-    "Kids specialist",
-    "Colouring basic",
-] as const;
+import { mockBarbers } from "./_data/mock-barbers";
 
 export default function OwnerBarberPage() {
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative space-y-6'>
                     <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/85 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
@@ -84,9 +45,11 @@ export default function OwnerBarberPage() {
                             </p>
                         </div>
                         <div className='flex flex-wrap gap-3'>
-                            <Button className='gap-2'>
-                                <Plus className='h-4 w-4' />
-                                Tambah barber
+                            <Button className='gap-2' asChild>
+                                <Link href='/owner/barber/create'>
+                                    <Plus className='h-4 w-4' />
+                                    Tambah barber
+                                </Link>
                             </Button>
                             <Button variant='outline' className='border-border/60 gap-2'>
                                 <Send className='h-4 w-4' />
@@ -112,19 +75,20 @@ export default function OwnerBarberPage() {
                                     <TableHead>Level</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Shift</TableHead>
+                                    <TableHead className='w-[110px] text-right'>Aksi</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {barberList.map((barber) => (
-                                    <TableRow key={barber.name}>
+                                {mockBarbers.map((barber) => (
+                                    <TableRow key={barber.id}>
                                         <TableCell className='flex items-center gap-3'>
                                             <Avatar className='h-9 w-9'>
                                                 <AvatarImage src='/placeholder.jpg' alt={barber.name} />
-                                                <AvatarFallback>{barber.name.slice(0, 2)}</AvatarFallback>
+                                                <AvatarFallback>{barber.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                                             </Avatar>
                                             <div>
                                                 <p className='font-semibold text-foreground'>{barber.name}</p>
-                                                <p className='text-xs text-muted-foreground'>ID #{barber.name.slice(0, 3).toUpperCase()}</p>
+                                                <p className='text-xs text-muted-foreground'>ID {barber.id}</p>
                                             </div>
                                         </TableCell>
                                         <TableCell>{barber.branch}</TableCell>
@@ -137,8 +101,14 @@ export default function OwnerBarberPage() {
                                                 {barber.status}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className='text-sm font-medium text-foreground'>
-                                            {barber.shift}
+                                        <TableCell className='text-sm font-medium text-foreground'>{barber.shift}</TableCell>
+                                        <TableCell className='text-right'>
+                                            <Button variant='ghost' size='sm' className='gap-1 text-primary' asChild>
+                                                <Link href={`/owner/barber/${encodeURIComponent(barber.id)}/edit`}>
+                                                    <Pencil className='h-3.5 w-3.5' />
+                                                    Edit
+                                                </Link>
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -153,54 +123,26 @@ export default function OwnerBarberPage() {
                             <CardTitle className='text-xl font-semibold'>Form barber baru</CardTitle>
                             <CardDescription>Isi data barber, skill, dan cabang bertugas. Akun akan dikirim otomatis.</CardDescription>
                         </CardHeader>
-                        <CardContent className='space-y-4'>
-                            <div className='grid gap-4 sm:grid-cols-2'>
-                                <div className='space-y-2'>
-                                    <Label htmlFor='barber-name'>Nama lengkap</Label>
-                                    <Input id='barber-name' placeholder='Nama barber' />
-                                </div>
-                                <div className='space-y-2'>
-                                    <Label htmlFor='barber-email'>Email</Label>
-                                    <Input id='barber-email' placeholder='barber@trimtime.com' />
-                                </div>
+                        <CardContent className='space-y-4 text-sm text-muted-foreground'>
+                            <p className='text-foreground'>Registrasi barber baru hanya butuh beberapa langkah:</p>
+                            <ul className='list-disc space-y-1 pl-5'>
+                                <li>Isi data personal & kontak yang valid.</li>
+                                <li>Pilih skillset, level, dan shift default untuk auto scheduling.</li>
+                                <li>Sistem TrimTime mengirim credential & panduan onboarding otomatis.</li>
+                            </ul>
+                            <div className='rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 text-sm text-primary'>
+                                <p className='font-semibold'>Butuh import massal?</p>
+                                <p className='text-primary/80'>Gunakan template CSV untuk aktifkan hingga 50 barber sekaligus.</p>
                             </div>
-                            <div className='grid gap-4 sm:grid-cols-2'>
-                                <div className='space-y-2 '>
-                                    <Label htmlFor='barber-phone'>Nomor telpon</Label>
-                                    <Input id='barber-phone' placeholder='08xxx' />
-                                </div>
-                                <div className='space-y-2'>
-                                    <Label htmlFor='barber-branch'>Cabang</Label>
-                                    <Input id='barber-branch' placeholder='Pilih cabang' />
-                                </div>
-                            </div>
-                            <div className='space-y-2'>
-                                <Label>Skillset</Label>
-                                <div className='grid gap-3 sm:grid-cols-2'>
-                                    {skills.map((skill) => (
-                                        <label key={skill} className='flex items-center gap-3 rounded-lg border border-border/40 bg-background/80 px-3 py-2 text-sm'>
-                                            <Checkbox checked className='border-border/60' />
-                                            {skill}
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className='space-y-2'>
-                                <Label>Shift default</Label>
-                                <div className='grid gap-3 sm:grid-cols-2'>
-                                    {["Pagi (09:00-17:00)", "Sore (13:00-21:00)"].map((shift) => (
-                                        <label key={shift} className='flex items-center gap-2 rounded-lg border border-border/40 bg-muted/15 px-3 py-2 text-sm'>
-                                            <Checkbox className='border-border/60' />
-                                            {shift}
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                            <Button className='w-full gap-2'>
-                                <Mail className='h-4 w-4' />
-                                Kirim undangan akun
-                            </Button>
                         </CardContent>
+                        <CardFooter>
+                            <Button className='w-full gap-2' asChild>
+                                <Link href='/owner/barber/create'>
+                                    <Mail className='h-4 w-4' />
+                                    Mulai registrasi barber
+                                </Link>
+                            </Button>
+                        </CardFooter>
                     </Card>
                     <Card className='border-border/50 shadow-sm'>
                         <CardHeader>

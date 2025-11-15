@@ -6,15 +6,26 @@ import { usePathname } from "next/navigation";
 import { BottomNav } from "@/components/bottom-nav";
 import { DesktopNav } from "@/components/desktop-nav";
 
-const NAVLESS_PREFIXES = ["/login", "/register"];
+const AUTH_PREFIXES = ["/login", "/register"] as const;
+const MARKETING_ROUTES = ["/", "/contact"] as const;
 
-function shouldHideNavigation(pathname?: string | null) {
+function isAuthLayout(pathname?: string | null) {
     if (!pathname) {
         return false;
     }
 
-    return NAVLESS_PREFIXES.some((prefix) =>
-        pathname === prefix || pathname.startsWith(`${prefix}/`)
+    return AUTH_PREFIXES.some(
+        (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+    );
+}
+
+function isMarketingLayout(pathname?: string | null) {
+    if (!pathname) {
+        return false;
+    }
+
+    return MARKETING_ROUTES.includes(
+        pathname as (typeof MARKETING_ROUTES)[number]
     );
 }
 
@@ -24,18 +35,17 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
     const pathname = usePathname();
-    const hideNavigation = shouldHideNavigation(pathname);
 
-    if (hideNavigation) {
+    if (isMarketingLayout(pathname)) {
         return (
-            <main className='mx-auto flex min-h-screen w-full max-w-3xl flex-1 flex-col bg-muted/20 px-5 py-10 text-foreground'>
-                <div className='flex flex-1 flex-col justify-center'>
-                    <div className='rounded-2xl border border-border/40 bg-background shadow-sm'>
-                        {children}
-                    </div>
-                </div>
-            </main>
+            <div className='min-h-screen bg-background text-foreground'>
+                {children}
+            </div>
         );
+    }
+
+    if (isAuthLayout(pathname)) {
+        return <>{children}</>;
     }
 
     return (

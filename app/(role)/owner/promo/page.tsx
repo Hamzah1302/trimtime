@@ -1,15 +1,17 @@
 "use client";
 
+import Link from "next/link";
+
 import {
     Gift,
     Loader2,
-    Percent,
     PlusCircle,
     Sparkles,
     Star,
     Users,
 } from "lucide-react";
 
+import { ownerLoyaltyStats, ownerPromos } from "./_data/mock-promos";
 import { PageShell } from "@/components/layout/page-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,10 +22,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import {
     Tabs,
     TabsContent,
@@ -31,40 +29,10 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs";
 
-const promos = [
-    {
-        name: "Payday Fade 20%",
-        channel: "App user",
-        period: "25-30",
-        target: "Semua pelanggan",
-        status: "Aktif",
-    },
-    {
-        name: "Birthday Treat + Steam",
-        channel: "Push notif",
-        period: "Auto bulan ulang tahun",
-        target: "Member Gold",
-        status: "Terjadwal",
-    },
-    {
-        name: "Refer a friend 40k",
-        channel: "Referral code",
-        period: "Sampai 31 Mar",
-        target: "Member baru",
-        status: "Aktif",
-    },
-] as const;
-
-const loyaltyStats = [
-    { label: "Member aktif", value: "8.420 user", helper: "Naik 6% MoM" },
-    { label: "Poin ditukarkan", value: "1.430 voucher", helper: "Total Rp 74 jt" },
-    { label: "Promo berjalan", value: "6 campaign", helper: "3 auto, 3 manual" },
-] as const;
-
 export default function OwnerPromoPage() {
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative space-y-6'>
                     <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/85 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
@@ -79,9 +47,11 @@ export default function OwnerPromoPage() {
                             </p>
                         </div>
                         <div className='flex flex-wrap gap-3'>
-                            <Button className='gap-2'>
-                                <PlusCircle className='h-4 w-4' />
-                                Campaign baru
+                            <Button className='gap-2' asChild>
+                                <Link href='/owner/promo/create'>
+                                    <PlusCircle className='h-4 w-4' />
+                                    Campaign baru
+                                </Link>
                             </Button>
                             <Button variant='outline' className='border-border/60 gap-2'>
                                 <Loader2 className='h-4 w-4 animate-spin text-primary' />
@@ -94,7 +64,7 @@ export default function OwnerPromoPage() {
 
             <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-8'>
                 <div className='grid gap-4 sm:grid-cols-3'>
-                    {loyaltyStats.map((stat) => (
+                    {ownerLoyaltyStats.map((stat) => (
                         <Card key={stat.label} className='border-border/50 shadow-sm'>
                             <CardHeader>
                                 <CardDescription className='text-xs uppercase tracking-widest'>{stat.label}</CardDescription>
@@ -117,19 +87,41 @@ export default function OwnerPromoPage() {
                                 <CardDescription>Promo tampil otomatis di halaman user.</CardDescription>
                             </CardHeader>
                             <CardContent className='space-y-3'>
-                                {promos.map((promo) => (
-                                    <div key={promo.name} className='rounded-xl border border-border/40 bg-muted/15 p-4'>
+                                {ownerPromos.map((promo) => (
+                                    <div key={promo.slug} className='rounded-xl border border-border/40 bg-muted/15 p-4'>
                                         <div className='flex flex-wrap items-center justify-between gap-3'>
-                                            <div>
+                                            <div className='space-y-1'>
                                                 <p className='text-base font-semibold text-foreground'>{promo.name}</p>
                                                 <p className='text-xs text-muted-foreground'>
-                                                    {promo.channel} • {promo.period}
+                                                    {promo.channel} • {promo.period.label}
                                                 </p>
                                                 <p className='text-xs text-muted-foreground'>Target: {promo.target}</p>
                                             </div>
-                                            <Badge variant='outline' className='border-border/40 text-[10px] uppercase tracking-widest'>
-                                                {promo.status}
-                                            </Badge>
+                                            <div className='flex items-center gap-2'>
+                                                <Badge variant='outline' className='border-border/40 text-[10px] uppercase tracking-widest'>
+                                                    {promo.status}
+                                                </Badge>
+                                                <Button variant='ghost' size='sm' className='gap-1 text-xs font-semibold text-primary' asChild>
+                                                    <Link href={`/owner/promo/${promo.slug}`}>
+                                                        Detail
+                                                        <Star className='h-3.5 w-3.5' />
+                                                    </Link>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <div className='mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-3'>
+                                            <div className='rounded-lg border border-border/30 bg-background/60 px-3 py-2'>
+                                                <p className='font-semibold text-foreground'>Min transaksi</p>
+                                                <p>{promo.minTransaction}</p>
+                                            </div>
+                                            <div className='rounded-lg border border-border/30 bg-background/60 px-3 py-2'>
+                                                <p className='font-semibold text-foreground'>Kuota</p>
+                                                <p>{promo.quota}</p>
+                                            </div>
+                                            <div className='rounded-lg border border-border/30 bg-background/60 px-3 py-2'>
+                                                <p className='font-semibold text-foreground'>Cabang aktif</p>
+                                                <p>{promo.branchCoverage.length} cabang</p>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -138,58 +130,29 @@ export default function OwnerPromoPage() {
 
                         <Card className='border-border/50 shadow-sm'>
                             <CardHeader>
-                                <CardTitle className='text-xl font-semibold'>Buat promo baru</CardTitle>
-                                <CardDescription>Atur nominal diskon, cabang, dan syarat otomatis.</CardDescription>
+                                <CardTitle className='text-xl font-semibold'>Mulai campaign baru</CardTitle>
+                                <CardDescription>Gunakan template siap pakai untuk membuat promo marketplace.</CardDescription>
                             </CardHeader>
-                            <CardContent className='space-y-4'>
-                                <div className='grid gap-4 sm:grid-cols-2'>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor='promo-title'>Judul promo</Label>
-                                        <Input id='promo-title' placeholder='Payday Fade 20%' />
+                            <CardContent className='space-y-4 text-sm text-muted-foreground'>
+                                <p>
+                                    Isi detail lengkap promo, pilih segmen pelanggan, dan atur distribusi cabang pada form khusus.
+                                    Sistem akan membantu publikasi ke aplikasi user dan dashboard barber.
+                                </p>
+                                <div className='grid gap-3 sm:grid-cols-2'>
+                                    <div className='rounded-xl border border-border/40 bg-muted/15 p-3'>
+                                        <p className='text-xs uppercase tracking-widest text-muted-foreground'>Email template</p>
+                                        <p className='font-semibold text-foreground'>A/B testing copy promo</p>
                                     </div>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor='promo-type'>Tipe diskon</Label>
-                                        <Input id='promo-type' placeholder='Diskon persentase' />
-                                    </div>
-                                </div>
-                                <div className='grid gap-4 sm:grid-cols-3'>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor='promo-value'>Nilai diskon</Label>
-                                        <Input id='promo-value' placeholder='20%' />
-                                    </div>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor='promo-min'>Min transaksi</Label>
-                                        <Input id='promo-min' placeholder='Rp 150.000' />
-                                    </div>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor='promo-quota'>Kuota</Label>
-                                        <Input id='promo-quota' placeholder='500 klaim' />
+                                    <div className='rounded-xl border border-border/40 bg-muted/15 p-3'>
+                                        <p className='text-xs uppercase tracking-widest text-muted-foreground'>Segmentasi</p>
+                                        <p className='font-semibold text-foreground'>Filter member marketplace</p>
                                     </div>
                                 </div>
-                                <div className='grid gap-4 sm:grid-cols-2'>
-                                    <div className='space-y-2'>
-                                        <Label>Periode</Label>
-                                        <Input type='date' defaultValue='2025-02-10' />
-                                    </div>
-                                    <div className='space-y-2'>
-                                        <Label>Selesai</Label>
-                                        <Input type='date' defaultValue='2025-02-28' />
-                                    </div>
-                                </div>
-                                <div className='space-y-2'>
-                                    <Label htmlFor='promo-desc'>Detail promo</Label>
-                                    <Textarea id='promo-desc' rows={3} placeholder='Masukkan syarat ketentuan' />
-                                </div>
-                                <div className='flex items-center justify-between rounded-xl border border-border/40 bg-muted/15 px-4 py-3'>
-                                    <div className='space-y-1 text-sm text-muted-foreground'>
-                                        <p className='font-semibold text-foreground'>Publish ke app user</p>
-                                        <p>Promo akan tampil di tab Promo + dikirim push notif</p>
-                                    </div>
-                                    <Switch defaultChecked />
-                                </div>
-                                <Button className='w-full gap-2'>
-                                    <Percent className='h-4 w-4' />
-                                    Simpan & publikasikan
+                                <Button className='w-full gap-2' asChild>
+                                    <Link href='/owner/promo/create'>
+                                        <Sparkles className='h-4 w-4' />
+                                        Buka form create promo
+                                    </Link>
                                 </Button>
                             </CardContent>
                         </Card>

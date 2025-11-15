@@ -1,13 +1,8 @@
 "use client";
 
-import {
-    Boxes,
-    CheckCircle,
-    Package2,
-    PackageCheck,
-    ShoppingBag,
-    Truck,
-} from "lucide-react";
+import Link from "next/link";
+
+import { Boxes, CheckCircle, Package2, PackageCheck, Pencil, ShoppingBag, Truck, UploadCloud } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +11,7 @@ import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
@@ -29,29 +25,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-const products = [
-    {
-        name: "Clay Pomade Signature",
-        sku: "PRD-201",
-        stock: 64,
-        status: "Ready",
-        price: "Rp 145.000",
-    },
-    {
-        name: "Carbon Comb Pro",
-        sku: "PRD-165",
-        stock: 18,
-        status: "Low stock",
-        price: "Rp 85.000",
-    },
-    {
-        name: "Pre-Styling Spray",
-        sku: "PRD-190",
-        stock: 0,
-        status: "Habis",
-        price: "Rp 110.000",
-    },
-] as const;
+import { mockStoreProducts } from "./_data/mock-products";
 
 const fulfillment = [
     { label: "Pesanan mini store hari ini", value: "87 transaksi" },
@@ -62,7 +36,7 @@ const fulfillment = [
 export default function OwnerStorePage() {
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative space-y-6'>
                     <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/85 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
@@ -77,8 +51,14 @@ export default function OwnerStorePage() {
                             </p>
                         </div>
                         <div className='flex flex-wrap gap-3'>
-                            <Button>Tambah produk</Button>
-                            <Button variant='outline' className='border-border/60'>
+                            <Button className='gap-2' asChild>
+                                <Link href='/owner/store/create'>
+                                    <PackageCheck className='h-4 w-4' />
+                                    Tambah produk
+                                </Link>
+                            </Button>
+                            <Button variant='outline' className='border-border/60 gap-2'>
+                                <UploadCloud className='h-4 w-4' />
                                 Import katalog
                             </Button>
                         </div>
@@ -114,11 +94,12 @@ export default function OwnerStorePage() {
                                         <TableHead>Stok</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead>Harga</TableHead>
+                                        <TableHead className='w-[110px] text-right'>Aksi</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {products.map((product) => (
-                                        <TableRow key={product.sku}>
+                                    {mockStoreProducts.map((product) => (
+                                        <TableRow key={product.id}>
                                             <TableCell className='font-semibold text-foreground'>{product.name}</TableCell>
                                             <TableCell>{product.sku}</TableCell>
                                             <TableCell>{product.stock} pcs</TableCell>
@@ -131,6 +112,14 @@ export default function OwnerStorePage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className='font-semibold text-foreground'>{product.price}</TableCell>
+                                            <TableCell className='text-right'>
+                                                <Button variant='ghost' size='sm' className='gap-1 text-primary' asChild>
+                                                    <Link href={`/owner/store/${encodeURIComponent(product.id)}/edit`}>
+                                                        <Pencil className='h-3.5 w-3.5' />
+                                                        Edit
+                                                    </Link>
+                                                </Button>
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -195,6 +184,39 @@ export default function OwnerStorePage() {
                         </CardContent>
                     </Card>
                 </div>
+
+                <Card className='border-border/50 shadow-sm'>
+                    <CardHeader>
+                        <CardTitle className='text-xl font-semibold'>Panduan produk unggulan</CardTitle>
+                        <CardDescription>Mulai tambah produk baru dengan template konten siap pakai.</CardDescription>
+                    </CardHeader>
+                    <CardContent className='grid gap-3 text-sm text-muted-foreground sm:grid-cols-2'>
+                        <div>
+                            <p className='font-semibold text-foreground'>1. Upload foto kualitas tinggi</p>
+                            <p>Gunakan background polos dan resolusi minimal 1080px agar tampak profesional.</p>
+                        </div>
+                        <div>
+                            <p className='font-semibold text-foreground'>2. Jelaskan manfaat utama</p>
+                            <p>Tulis 2-3 poin manfaat dan highlight bahan utama dalam deskripsi.</p>
+                        </div>
+                        <div>
+                            <p className='font-semibold text-foreground'>3. Atur status stok real-time</p>
+                            <p>Pastikan status stok diperbarui agar pelanggan tidak kecewa saat checkout.</p>
+                        </div>
+                        <div>
+                            <p className='font-semibold text-foreground'>4. Tambahkan tag promosi</p>
+                            <p>Gunakan tag Best Seller atau Limited untuk menambah rasa urgensi.</p>
+                        </div>
+                    </CardContent>
+                    <CardFooter>
+                        <Button className='gap-2' asChild>
+                            <Link href='/owner/store/create'>
+                                <PackageCheck className='h-4 w-4' />
+                                Mulai registrasi produk
+                            </Link>
+                        </Button>
+                    </CardFooter>
+                </Card>
 
                 <Card className='border-border/50 shadow-sm'>
                     <CardHeader>

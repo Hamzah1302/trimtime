@@ -5,7 +5,7 @@ import {
     CalendarClock,
     ClipboardCheck,
     Clock,
-    History,
+    XCircle,
     MapPin,
     MessageCircle,
     Phone,
@@ -16,6 +16,7 @@ import {
     UserRound,
     Wallet,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,6 +31,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -45,6 +47,117 @@ const statusBadgeStyles = {
     done: "bg-emerald-500/15 text-emerald-600",
     cancelled: "bg-destructive/10 text-destructive",
 } satisfies Record<string, string>;
+
+type ProgressStatusCardConfig = {
+    icon: LucideIcon;
+    title: string;
+    description: string;
+    surfaceClass: string;
+    iconClass: string;
+    primaryLabel?: string;
+    primaryVariant: "default" | "secondary" | "outline" | "destructive" | "ghost";
+    secondaryLabel?: string;
+    secondaryVariant: "default" | "secondary" | "outline" | "destructive" | "ghost";
+};
+
+const progressStatusContent: Record<
+    keyof typeof statusBadgeStyles,
+    ProgressStatusCardConfig
+> = {
+    pending: {
+        icon: Clock,
+        title: "Menunggu konfirmasi",
+        description:
+            "Hubungi pelanggan atau kirim pengingat agar check-in tepat waktu.",
+        surfaceClass:
+            "border-amber-200/60 bg-amber-100/80 text-amber-900 dark:border-amber-400/40 dark:bg-amber-500/10",
+        iconClass:
+            "bg-amber-500/20 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300",
+        primaryLabel: "Konfirmasi kehadiran",
+        primaryVariant: "default",
+        secondaryLabel: "Kirim pengingat WhatsApp",
+        secondaryVariant: "outline",
+    },
+    confirmed: {
+        icon: BadgeCheck,
+        title: "Booking terkonfirmasi",
+        description:
+            "Siapkan barber dan kursi terbaik. Tandai mulai layanan saat pelanggan tiba.",
+        surfaceClass:
+            "border-primary/40 bg-primary/10 text-primary-900 dark:border-primary/30 dark:bg-primary/15",
+        iconClass:
+            "bg-primary/15 text-primary dark:bg-primary/25 dark:text-primary-100",
+        primaryLabel: "Mulai sesi layanan",
+        primaryVariant: "default",
+        secondaryLabel: "Atur ulang barber/kursi",
+        secondaryVariant: "outline",
+    },
+    ongoing: {
+        icon: CalendarClock,
+        title: "Layanan sedang berjalan",
+        description:
+            "Update progress tiap tahapan agar tim front desk dan owner sinkron.",
+        surfaceClass:
+            "border-sky-200/60 bg-sky-100/70 text-sky-900 dark:border-sky-400/40 dark:bg-sky-500/10",
+        iconClass:
+            "bg-sky-500/20 text-sky-700 dark:bg-sky-500/25 dark:text-sky-200",
+        primaryLabel: "Tandai tahap berikutnya",
+        primaryVariant: "default",
+        secondaryLabel: "Tambah catatan layanan",
+        secondaryVariant: "outline",
+    },
+    done: {
+        icon: ClipboardCheck,
+        title: "Layanan selesai",
+        description:
+            "Kirim permintaan rating dan rangkum pembayaran untuk tutup transaksi.",
+        surfaceClass:
+            "border-emerald-200/60 bg-emerald-100/70 text-emerald-900 dark:border-emerald-400/40 dark:bg-emerald-500/10",
+        iconClass:
+            "bg-emerald-500/20 text-emerald-700 dark:bg-emerald-500/25 dark:text-emerald-200",
+        primaryLabel: "Kirim permintaan rating",
+        primaryVariant: "default",
+        secondaryLabel: "Lihat ringkasan pembayaran",
+        secondaryVariant: "outline",
+    },
+    cancelled: {
+        icon: XCircle,
+        title: "Booking dibatalkan",
+        description:
+            "Tawarkan jadwal pengganti atau catat sebagai no-show untuk laporan.",
+        surfaceClass:
+            "border-destructive/40 bg-destructive/10 text-destructive dark:border-destructive/50 dark:bg-destructive/20",
+        iconClass:
+            "bg-destructive/20 text-destructive dark:bg-destructive/30 dark:text-destructive-100",
+        primaryLabel: "Jadwalkan ulang",
+        primaryVariant: "outline",
+        secondaryLabel: "Catat sebagai no-show",
+        secondaryVariant: "ghost",
+    },
+} satisfies Record<
+    keyof typeof statusBadgeStyles,
+    {
+        icon: LucideIcon;
+        title: string;
+        description: string;
+        surfaceClass: string;
+        iconClass: string;
+        primaryLabel?: string;
+        primaryVariant?:
+            | "default"
+            | "secondary"
+            | "outline"
+            | "destructive"
+            | "ghost";
+        secondaryLabel?: string;
+        secondaryVariant?:
+            | "default"
+            | "secondary"
+            | "outline"
+            | "destructive"
+            | "ghost";
+    }
+>;
 
 type BookingDetail = {
     id: string;
@@ -79,6 +192,8 @@ type BookingDetail = {
         method: string;
         tip: string;
         status: string;
+        proofImage?: string;
+        proofUploadedAt?: string;
     };
     timeline: Array<{
         time: string;
@@ -125,9 +240,11 @@ const bookingDetails: Record<string, BookingDetail> = {
             discount: 8500,
             total: 76500,
             promoCode: "TRIM10",
-            method: "QRIS (diproses saat check-out)",
+            method: "QRIS",
             tip: "Belum diatur",
-            status: "Menunggu pembayaran",
+            status: "Lunas",
+            proofImage: "/payment-proof-sample.jpg",
+            proofUploadedAt: "11 Feb 2025, 08:45 WIB",
         },
         timeline: [
             {
@@ -189,9 +306,11 @@ const bookingDetails: Record<string, BookingDetail> = {
             discount: 8500,
             total: 76500,
             promoCode: "TRIM10",
-            method: "QRIS (diproses saat check-out)",
+            method: "QRIS",
             tip: "Belum diatur",
-            status: "Menunggu pembayaran",
+            status: "Lunas",
+            proofImage: "/payment-proof-sample.jpg",
+            proofUploadedAt: "11 Feb 2025, 08:45 WIB",
         },
         timeline: [
             {
@@ -306,7 +425,7 @@ export default async function BarberBookingDetailPage({
             <main className='space-y-7 px-5 py-6 lg:space-y-8 lg:px-8 lg:py-8'>
                 {booking ? (
                     <>
-                        <div className='grid cols-1 gap-8'>
+                        <div className='grid cols-2 gap-8'>
                             <Card className='border-border/50 shadow-sm'>
                                 <CardHeader className='flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
                                     <div className='flex items-center gap-3'>
@@ -506,15 +625,41 @@ export default async function BarberBookingDetailPage({
                                             id='payment'
                                             className='rounded-xl border border-border/40 bg-muted/20 p-4'
                                         >
-                                            <div className='flex items-start justify-between'>
+                                            <div className='flex items-start justify-between mb-4'>
                                                 <div>
                                                     <p className='text-xs uppercase tracking-widest text-muted-foreground'>
                                                         Pembayaran
                                                     </p>
-                                                    <p className='mt-1 text-xs text-muted-foreground'>
-                                                        Status:{" "}
-                                                        {booking.payment.status}
-                                                    </p>
+                                                    <div className='flex items-center gap-2 mt-1'>
+                                                        <Badge
+                                                            variant={
+                                                                booking.payment
+                                                                    .status ===
+                                                                "Lunas"
+                                                                    ? "default"
+                                                                    : "secondary"
+                                                            }
+                                                            className={
+                                                                booking.payment
+                                                                    .status ===
+                                                                "Lunas"
+                                                                    ? "bg-emerald-500/15 text-emerald-600 border-emerald-500/20"
+                                                                    : ""
+                                                            }
+                                                        >
+                                                            {
+                                                                booking.payment
+                                                                    .status
+                                                            }
+                                                        </Badge>
+                                                        <span className='text-xs text-muted-foreground'>
+                                                            via{" "}
+                                                            {
+                                                                booking.payment
+                                                                    .method
+                                                            }
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 {booking.payment.promoCode ? (
                                                     <Badge
@@ -580,44 +725,74 @@ export default async function BarberBookingDetailPage({
                                                     </span>
                                                 </div>
                                             </div>
-                                            <div className='mt-3 space-y-1 text-xs text-muted-foreground'>
-                                                <p>
-                                                    Metode:{" "}
-                                                    {booking.payment.method}
-                                                </p>
+                                            {booking.payment.proofImage ? (
+                                                <div className='mt-4 space-y-3'>
+                                                    <div className='flex items-center justify-between'>
+                                                        <p className='text-xs uppercase tracking-widest text-muted-foreground'>
+                                                            Bukti Pembayaran
+                                                        </p>
+                                                        <p className='text-xs text-muted-foreground'>
+                                                            Diunggah:{" "}
+                                                            {
+                                                                booking.payment
+                                                                    .proofUploadedAt
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                    <div className='rounded-lg border border-border/30 bg-background/60 p-3'>
+                                                        <div className='flex items-center justify-center h-48 bg-muted/50 rounded-md border border-dashed border-border/30'>
+                                                            <div className='text-center space-y-2'>
+                                                                <div className='w-12 h-12 mx-auto bg-primary/10 rounded-full flex items-center justify-center'>
+                                                                    <Wallet className='h-6 w-6 text-primary' />
+                                                                </div>
+                                                                <p className='text-xs font-medium text-foreground'>
+                                                                    Bukti
+                                                                    Pembayaran
+                                                                    QRIS
+                                                                </p>
+                                                                <p className='text-xs text-muted-foreground'>
+                                                                    Screenshot
+                                                                    transaksi
+                                                                    berhasil
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className='mt-4 rounded-lg border border-dashed border-border/50 bg-muted/30 p-4 text-center'>
+                                                    <p className='text-xs text-muted-foreground'>
+                                                        Bukti pembayaran belum
+                                                        diunggah
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            <div className='mt-4 space-y-1 text-xs text-muted-foreground'>
                                                 <p>
                                                     Tip: {booking.payment.tip}
                                                 </p>
                                             </div>
-                                            <div className='mt-3 flex flex-wrap gap-2'>
-                                                <Button
-                                                    size='sm'
-                                                    className='gap-2 text-xs'
-                                                    asChild
-                                                >
-                                                    <Link
-                                                        href={`${bookingBasePath}?action=confirm-payment`}
-                                                        className='inline-flex items-center gap-2'
+
+                                            {booking.payment.status !==
+                                                "Lunas" && (
+                                                <div className='mt-4 flex flex-wrap gap-2'>
+                                                    <Button
+                                                        size='sm'
+                                                        className='gap-2 text-xs'
+                                                        asChild
                                                     >
-                                                        <Wallet className='h-3.5 w-3.5' />
-                                                        Konfirmasi pembayaran
-                                                    </Link>
-                                                </Button>
-                                                <Button
-                                                    size='sm'
-                                                    variant='outline'
-                                                    className='border-border/60 gap-2 text-xs'
-                                                    asChild
-                                                >
-                                                    <Link
-                                                        href={`${bookingBasePath}?action=view-transactions#payment`}
-                                                        className='inline-flex items-center gap-2'
-                                                    >
-                                                        <History className='h-3.5 w-3.5' />
-                                                        Lihat riwayat transaksi
-                                                    </Link>
-                                                </Button>
-                                            </div>
+                                                        <Link
+                                                            href={`${bookingBasePath}?action=confirm-payment`}
+                                                            className='inline-flex items-center gap-2'
+                                                        >
+                                                            <Wallet className='h-3.5 w-3.5' />
+                                                            Konfirmasi
+                                                            pembayaran
+                                                        </Link>
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </CardContent>
@@ -634,91 +809,164 @@ export default async function BarberBookingDetailPage({
                                         TrimTime.
                                     </CardDescription>
                                 </CardHeader>
-                                <CardContent className='space-y-4 text-sm text-muted-foreground'>
-                                    <div className='space-y-2'>
-                                        <div className='flex items-center justify-between'>
-                                            <p className='font-semibold text-foreground'>
-                                                {booking.progress}% selesai
-                                            </p>
+                                <CardContent className='grid gap-6 text-sm text-muted-foreground lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]'>
+                                    {(() => {
+                                        const statusContent =
+                                            progressStatusContent[
+                                                booking.status
+                                            ] ?? progressStatusContent.pending;
+                                        const StatusIcon = statusContent.icon;
+                                        return (
+                                            <div className='flex w-full flex-col justify-center space-y-4 lg:self-center'>
+                                                <div
+                                                    className={cn(
+                                                        "space-y-3 rounded-xl border p-4 shadow-sm transition",
+                                                        statusContent.surfaceClass
+                                                    )}
+                                                >
+                                                    <div className='flex items-start gap-3'>
+                                                        <span
+                                                            className={cn(
+                                                                "flex h-10 w-10 items-center justify-center rounded-full",
+                                                                statusContent.iconClass
+                                                            )}
+                                                        >
+                                                            <StatusIcon className='h-5 w-5' />
+                                                        </span>
+                                                        <div className='space-y-1'>
+                                                            <p className='text-sm font-semibold text-foreground'>
+                                                                {
+                                                                    statusContent.title
+                                                                }
+                                                            </p>
+                                                            <p className='text-xs leading-relaxed'>
+                                                                {
+                                                                    statusContent.description
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className='space-y-2'>
+                                                    <div className='flex items-center justify-between'>
+                                                        <p className='font-semibold text-foreground'>
+                                                            {booking.progress}%
+                                                            selesai
+                                                        </p>
+                                                        <Badge
+                                                            variant='outline'
+                                                            className='border-border/60'
+                                                        >
+                                                            Status:{" "}
+                                                            {
+                                                                booking.statusLabel
+                                                            }
+                                                        </Badge>
+                                                    </div>
+                                                    <Progress
+                                                        value={booking.progress}
+                                                    />
+                                                </div>
+
+                                                <div className='grid w-full gap-3'>
+                                                    {statusContent.primaryLabel ? (
+                                                        <Button
+                                                            variant={statusContent.primaryVariant ?? "default"}
+                                                            className={cn(
+                                                                "w-full",
+                                                                statusContent.primaryVariant === "outline"
+                                                                    ? "border-border/60"
+                                                                    : undefined
+                                                            )}
+                                                        >
+                                                            {statusContent.primaryLabel}
+                                                        </Button>
+                                                    ) : null}
+                                                    {statusContent.secondaryLabel ? (
+                                                        <Button
+                                                            variant={statusContent.secondaryVariant ?? "outline"}
+                                                            className={cn(
+                                                                "w-full",
+                                                                statusContent.secondaryVariant === "outline"
+                                                                    ? "border-border/60"
+                                                                    : undefined
+                                                            )}
+                                                        >
+                                                            {statusContent.secondaryLabel}
+                                                        </Button>
+                                                    ) : null}
+                                                    {!statusContent.primaryLabel &&
+                                                    !statusContent.secondaryLabel ? (
+                                                        <Button className='w-full'>
+                                                            {booking.actionLabel}
+                                                        </Button>
+                                                    ) : null}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                    <div className='space-y-4'>
+                                        <div className='flex flex-wrap items-center justify-between gap-2'>
+                                            <div>
+                                                <p className='text-base font-semibold text-foreground'>
+                                                    Timeline aktivitas
+                                                </p>
+                                                <p className='text-xs text-muted-foreground'>
+                                                    Riwayat otomatis dari sistem
+                                                    booking TrimTime.
+                                                </p>
+                                            </div>
                                             <Badge
                                                 variant='outline'
-                                                className='border-border/60'
+                                                className='border-border/60 bg-background/60 text-xs font-semibold uppercase tracking-widest text-muted-foreground'
                                             >
-                                                Status: {booking.statusLabel}
+                                                Update realtime
                                             </Badge>
                                         </div>
-                                        <Progress value={booking.progress} />
-                                    </div>
-                                    <div className='grid gap-3'>
-                                        <Button>{booking.actionLabel}</Button>
-                                        <Button
-                                            variant='outline'
-                                            className='border-border/60'
-                                        >
-                                            Tandai selesai & kirim permintaan
-                                            rating
-                                        </Button>
+                                        <div className='space-y-3'>
+                                            {booking.timeline.map((item) => {
+                                                const Icon = item.icon;
+                                                return (
+                                                    <div
+                                                        key={`${item.time}-${item.title}`}
+                                                        className='flex gap-4 rounded-xl border border-border/40 bg-muted/20 p-4 text-muted-foreground'
+                                                    >
+                                                        <span className='mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary'>
+                                                            <Icon className='h-4 w-4' />
+                                                        </span>
+                                                        <div className='flex-1 space-y-1'>
+                                                            <div className='flex flex-wrap items-center gap-2'>
+                                                                <p className='text-base font-semibold text-foreground'>
+                                                                    {item.title}
+                                                                </p>
+                                                                <Badge
+                                                                    variant='outline'
+                                                                    className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
+                                                                >
+                                                                    {item.time}
+                                                                </Badge>
+                                                                {item.status ===
+                                                                "upcoming" ? (
+                                                                    <Badge className='bg-primary/15 text-primary'>
+                                                                        Selanjutnya
+                                                                    </Badge>
+                                                                ) : null}
+                                                            </div>
+                                                            <p className='text-xs leading-relaxed'>
+                                                                {
+                                                                    item.description
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
                         </div>
-
-                        <Card className='border-border/50 shadow-sm'>
-                            <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>
-                                <div>
-                                    <CardTitle className='text-xl font-semibold tracking-tight'>
-                                        Timeline aktivitas
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Riwayat otomatis dari sistem booking
-                                        TrimTime.
-                                    </CardDescription>
-                                </div>
-                                <Badge
-                                    variant='outline'
-                                    className='border-border/60 bg-background/60 text-xs font-semibold uppercase tracking-widest text-muted-foreground'
-                                >
-                                    Update realtime
-                                </Badge>
-                            </CardHeader>
-                            <CardContent className='space-y-4'>
-                                {booking.timeline.map((item) => {
-                                    const Icon = item.icon;
-                                    return (
-                                        <div
-                                            key={`${item.time}-${item.title}`}
-                                            className='flex gap-4 rounded-xl border border-border/40 bg-muted/20 p-4 text-sm text-muted-foreground'
-                                        >
-                                            <span className='mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary'>
-                                                <Icon className='h-4 w-4' />
-                                            </span>
-                                            <div className='flex-1 space-y-1'>
-                                                <div className='flex flex-wrap items-center gap-2'>
-                                                    <p className='text-base font-semibold text-foreground'>
-                                                        {item.title}
-                                                    </p>
-                                                    <Badge
-                                                        variant='outline'
-                                                        className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
-                                                    >
-                                                        {item.time}
-                                                    </Badge>
-                                                    {item.status ===
-                                                    "upcoming" ? (
-                                                        <Badge className='bg-primary/15 text-primary'>
-                                                            Selanjutnya
-                                                        </Badge>
-                                                    ) : null}
-                                                </div>
-                                                <p className='text-xs leading-relaxed'>
-                                                    {item.description}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </CardContent>
-                        </Card>
                     </>
                 ) : (
                     <Card className='border-border/50 shadow-sm'>

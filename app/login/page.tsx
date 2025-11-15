@@ -1,186 +1,124 @@
 import Link from "next/link";
 
-import type { LucideIcon } from "lucide-react";
-import { ArrowRight, BriefcaseBusiness, Crown, Scissors, UserRound } from "lucide-react";
-
-import { PageShell } from "@/components/layout/page-shell";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+    BriefcaseBusiness,
+    Crown,
+    Scissors,
+    Sparkles,
+    UserRound,
+} from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
-type RoleDefinition = {
-  id: string;
-  label: string;
-  badge: string;
-  description: string;
-  icon: LucideIcon;
-  href: string;
-  cta: string;
-  features: string[];
-};
-
-const roles: RoleDefinition[] = [
-  {
-    id: "owner",
-    label: "Owner Barbershop",
-    badge: "Kelola Outlet",
-    description:
-      "Kelola jadwal, tim barber, dan laporan outlet dalam satu dashboard.",
-    icon: Crown,
-    href: "/login/owner",
-    cta: "Buka login owner",
-    features: [
-      "Daftar mandiri",
-      "Menunggu persetujuan admin"
-    ]
-  },
-  {
-    id: "barber",
-    label: "Barber Partner",
-    badge: "Tim Layanan",
-    description:
-      "Akses operasional harian untuk menerima dan mengupdate booking.",
-    icon: Scissors,
-    href: "/login/barber",
-    cta: "Buka login barber",
-    features: [
-      "Dibuat oleh owner",
-      "Minta akses ke owner"
-    ]
-  },
-  {
-    id: "user",
-    label: "Pelanggan TrimTime",
-    badge: "Member",
-    description:
-      "Booking layanan favorit, atur jadwal, dan kumpulkan loyalty point.",
-    icon: UserRound,
-    href: "/login/user",
-    cta: "Buka login pelanggan",
-    features: [
-      "Daftar mandiri",
-      "Langsung aktif"
-    ]
-  },
-  {
-    id: "freelancer",
-    label: "Freelancer TrimTime",
-    badge: "Partner Lepas",
-    description:
-      "Terima job on-demand dan kembangkan portofolio barber kamu.",
-    icon: BriefcaseBusiness,
-    href: "/login/freelancer",
-    cta: "Buka login freelancer",
-    features: [
-      "Daftar mandiri",
-      "Menunggu persetujuan admin"
-    ]
-  }
-];
+const loginOptions = [
+    {
+        label: "Owner Barbershop",
+        href: "/login/owner",
+        icon: Crown,
+        description: "Kelola cabang, barber, dan laporan pendapatan secara real-time.",
+    },
+    {
+        label: "Barber Partner",
+        href: "/login/barber",
+        icon: Scissors,
+        description: "Kendalikan jadwal, status booking, dan pendapatan harian Anda.",
+    },
+    {
+        label: "Pelanggan TrimTime",
+        href: "/login/user",
+        icon: UserRound,
+        description: "Booking cepat tanpa antre dan pantau progres barber pilihan Anda.",
+    },
+    {
+        label: "Freelancer TrimTime",
+        href: "/login/freelancer",
+        icon: BriefcaseBusiness,
+        description: "Gabung jaringan job home service eksklusif dengan jadwal fleksibel.",
+    },
+] as const;
 
 export default function LoginPage() {
-  return (
-    <PageShell
-      background="plain"
-      containerClassName="pb-20 sm:pb-16"
-      contentClassName="gap-8"
-    >
-      <main className="flex flex-1 flex-col gap-6">
-        <section className="space-y-5 rounded-xl border border-border/50 bg-card/95 p-6 shadow-sm backdrop-blur-sm">
-          <div className="flex flex-col gap-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-              Pilih peran kamu
-            </p>
-            <h2 className="text-lg font-semibold text-foreground">
-              Login sesuai kebutuhan dan akses fitur yang tepat
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Setiap peran mendapatkan akses dashboard berbeda. Pilih peran yang
-              paling relevan sebelum melanjutkan metode login.
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            {roles.map(({ id, label, badge, description, icon: Icon, href, cta, features }) => (
-              <Card
-                key={id}
-                className="flex h-full flex-col justify-between border-border/60 bg-background/60 shadow-sm transition hover:border-primary/50 hover:shadow-md"
-              >
-                <CardHeader className="space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <Icon className="h-5 w-5" />
-                      </span>
-                      <div className="space-y-1">
-                        <CardTitle className="text-base font-semibold">
-                          {label}
-                        </CardTitle>
-                        <Badge variant="outline" className="border-primary/40 bg-primary/10 text-xs font-medium uppercase tracking-wide text-primary">
-                          {badge}
+    return (
+        <div className='relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-br from-background via-background to-muted/60 px-6 py-12 text-foreground'>
+            <span className='pointer-events-none absolute -top-32 left-1/3 h-72 w-72 rounded-full bg-primary/25 blur-3xl' />
+            <span className='pointer-events-none absolute bottom-[-6rem] right-[-2rem] h-80 w-80 rounded-full bg-secondary/20 blur-[140px]' />
+            <div className='relative z-10 grid w-full max-w-5xl overflow-hidden rounded-3xl border border-border/60 bg-background/95 shadow-2xl backdrop-blur md:grid-cols-[1.05fr_1fr]'>
+                <div className='flex flex-col justify-between gap-10 border-b border-border/40 bg-linear-to-br from-primary/15 via-primary/5 to-transparent p-8 md:border-b-0 md:border-r md:p-10'>
+                    <div className='space-y-6'>
+                        <Badge className='w-fit border border-primary/30 bg-primary/10 text-xs font-semibold uppercase tracking-widest text-primary'>
+                            Selamat datang
                         </Badge>
-                      </div>
+                        <div className='space-y-4'>
+                            <h1 className='text-3xl font-semibold leading-tight md:text-4xl'>
+                                Masuk ke ekosistem TrimTime
+                            </h1>
+                            <p className='text-sm text-primary/80 md:text-base'>
+                                Pilih peran login agar dashboard Anda otomatis menyesuaikan kebutuhan booking, operasional, maupun laporan.
+                            </p>
+                        </div>
+                        <div className='grid gap-4 text-sm text-primary/80'>
+                            <div className='flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/10/50 p-3'>
+                                <span className='flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary'>
+                                    <Sparkles className='h-4 w-4' />
+                                </span>
+                                <div className='space-y-1'>
+                                    <p className='font-medium text-foreground'>Satu platform terpadu</p>
+                                    <p>Data booking, jadwal barber, dan laporan owner tersinkron otomatis.</p>
+                                </div>
+                            </div>
+                            <div className='flex items-start gap-3 rounded-2xl border border-primary/10 bg-background/80 p-3'>
+                                <span className='flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary'>
+                                    <Scissors className='h-4 w-4' />
+                                </span>
+                                <div className='space-y-1'>
+                                    <p className='font-medium text-foreground'>Role-based access</p>
+                                    <p>Setiap peran hanya melihat fitur yang relevan sehingga operasional tetap aman.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                  <CardDescription className="text-sm text-muted-foreground">
-                    {description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Alur akses:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {features.map((feature) => (
-                      <Badge
-                        key={feature}
-                        variant="secondary"
-                        className="border border-border/60 bg-background text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
-                      >
-                        {feature}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-2">
-                  <Button asChild className="w-full justify-center gap-2">
-                    <Link href={href}>
-                      {cta}
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-xl border border-dashed border-border/50 bg-muted/30 p-4 text-center text-xs font-medium text-muted-foreground">
-          Dengan masuk, kamu menyetujui Ketentuan Layanan dan Kebijakan Privasi
-          TrimTime. Tim internal memiliki portal khusus di
-          <span className="px-1 font-semibold text-primary">admin TrimTime</span>.
-        </section>
-
-        <div className="mt-auto space-y-3 rounded-xl border border-border/50 bg-muted/40 p-5 text-sm text-muted-foreground">
-          <p className="font-semibold tracking-tight text-foreground">
-            Keuntungan masuk:
-          </p>
-          <ul className="list-inside list-disc space-y-1">
-            <li>Booking lebih cepat dengan preferensi tersimpan.</li>
-            <li>Lacak riwayat layanan dan loyalty points kamu.</li>
-            <li>
-              Dapatkan notifikasi promo eksklusif dari barber favorit.
-            </li>
-          </ul>
+                    <div className='rounded-2xl border border-border/40 bg-background/80 p-4 text-sm text-muted-foreground'>
+                        <p className='font-medium text-foreground'>Butuh bantuan akses?</p>
+                        <p>Hubungi support@trimtime.id untuk reset akun owner atau barber Anda.</p>
+                    </div>
+                </div>
+                <div className='flex flex-col gap-8 p-8 md:p-10'>
+                    <div className='space-y-2 text-center md:text-left'>
+                        <h2 className='text-2xl font-semibold text-foreground'>Masuk sesuai peran Anda</h2>
+                        <p className='text-sm text-muted-foreground'>Pilih akses yang tepat agar pengalaman TrimTime tetap lancar dan aman.</p>
+                    </div>
+                    <div className='grid gap-4'>
+                        {loginOptions.map(({ label, href, icon: Icon, description }) => (
+                            <Link
+                                key={href}
+                                href={href}
+                                className='group flex items-start gap-4 rounded-2xl border border-border/50 bg-card/80 p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/50 hover:bg-primary/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+                            >
+                                <span className='flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground'>
+                                    <Icon className='h-5 w-5' />
+                                </span>
+                                <div className='flex flex-1 flex-col gap-1'>
+                                    <div className='flex items-center justify-between gap-2'>
+                                        <span className='text-sm font-semibold text-foreground'>{label}</span>
+                                        <span className='text-[11px] font-semibold uppercase tracking-widest text-muted-foreground transition group-hover:text-primary'>Masuk</span>
+                                    </div>
+                                    <p className='text-xs leading-relaxed text-muted-foreground'>{description}</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                    <div className='space-y-3 rounded-2xl border border-border/40 bg-muted/15 p-5 text-sm text-muted-foreground'>
+                        <p className='text-center md:text-left'>
+                            Belum punya akun?{" "}
+                            <Link href='/register' className='font-semibold text-primary hover:underline'>
+                                Daftar sebagai pelanggan
+                            </Link>
+                            .
+                        </p>
+                        <p className='text-center text-xs md:text-left'>Akses admin internal dikelola terpisah oleh tim TrimTime.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </main>
-    </PageShell>
-  );
+    );
 }

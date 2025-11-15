@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
     CalendarCheck,
@@ -26,6 +27,14 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 const summaryMetrics = [
     {
@@ -44,8 +53,8 @@ const summaryMetrics = [
     },
     {
         label: "Home Service Aktif",
-        value: "3 perjalanan",
-        helper: "1 sedang OTW",
+        value: "3 selesai",
+        helper: "1 belum selesai",
         trend: "Prioritas cek GPS",
         icon: Users,
     },
@@ -57,6 +66,53 @@ const summaryMetrics = [
         icon: TrendingUp,
     },
 ] as const;
+
+type BarberStatus = "active" | "break" | "offline";
+
+const quickStatusOptions: Array<{
+    value: BarberStatus;
+    label: string;
+    helper: string;
+}> = [
+    {
+        value: "active",
+        label: "Aktif",
+        helper: "Tampil di daftar booking & terima pelanggan",
+    },
+    {
+        value: "break",
+        label: "Istirahat",
+        helper: "Tutup sementara pakai Smart Break",
+    },
+    {
+        value: "offline",
+        label: "Pulang",
+        helper: "Sembunyikan jadwal hingga besok",
+    },
+];
+
+const statusInfo: Record<
+    BarberStatus,
+    { label: string; description: string; tone: string }
+> = {
+    active: {
+        label: "Aktif",
+        description: "Barber siap menerima booking baru.",
+        tone: "text-emerald-600",
+    },
+    break: {
+        label: "Istirahat sementara",
+        description: "Smart Break aktif, jadwal akan auto-aktif saat selesai.",
+        tone: "text-amber-600",
+    },
+    offline: {
+        label: "Pulang",
+        description: "Tidak menerima booking sampai status diubah.",
+        tone: "text-muted-foreground",
+    },
+};
+
+const breakDurations = [15, 30, 45, 60] as const;
 
 const todaysClients = [
     {
@@ -159,6 +215,32 @@ const statusBadgeStyles = {
 const workloadPercentage = 78;
 
 export default function BarberDashboardPage() {
+    const [currentStatus, setCurrentStatus] = useState<BarberStatus>("active");
+    const [isBreakDialogOpen, setBreakDialogOpen] = useState(false);
+    const [selectedBreakDuration, setSelectedBreakDuration] =
+        useState<number>(15);
+    const [activeBreak, setActiveBreak] = useState<number | null>(null);
+
+    const handleStatusSelect = (status: BarberStatus) => {
+        if (status === "break") {
+            setBreakDialogOpen(true);
+            return;
+        }
+        setCurrentStatus(status);
+        setActiveBreak(null);
+    };
+
+    const handleStartBreak = () => {
+        setCurrentStatus("break");
+        setActiveBreak(selectedBreakDuration);
+        setBreakDialogOpen(false);
+    };
+
+    const handleEndBreak = () => {
+        setCurrentStatus("active");
+        setActiveBreak(null);
+    };
+
     return (
         <PageShell background='soft' contentClassName='gap-0'>
             <section className='relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
@@ -210,12 +292,159 @@ export default function BarberDashboardPage() {
                             <Button variant='outline' className='border-border/60'>
                                 Atur Jadwal
                             </Button>
-                            <Button>
-                                Tambah Booking
+                            <Button asChild>
+                                <Link href='/booking/create'>
+                                    Tambah Booking
+                                </Link>
                             </Button>
                         </div>
                     </div>
                 </div>
+
+                <div className='mt-6 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]'>
+                    <Card className='border-border/50 shadow-sm'>
+                        <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>
+                            <div>
+                                <CardTitle className='text-xl font-semibold tracking-tight'>
+                                    Status cepat
+                                </CardTitle>
+                                <CardDescription>
+                                    Atur ketersediaan kamu hanya dengan sekali klik.
+                                </CardDescription>
+                            </div>
+                            <Badge className='w-fit rounded-full bg-primary/10 text-[11px] font-semibold uppercase tracking-widest text-primary'>
+                                {statusInfo[currentStatus].label}
+                            </Badge>
+                        </CardHeader>
+                        <CardContent className='space-y-3'>
+                            <div className='grid gap-2 sm:grid-cols-3'>
+                                {quickStatusOptions.map((option) => (
+                                    <button
+                                        key={option.value}
+                                        type='button'
+                                        onClick={() => handleStatusSelect(option.value)}
+                                        className={`rounded-xl border px-4 py-3 text-left transition ${
+                                            currentStatus === option.value
+                                                ? "border-primary bg-primary/10 text-primary shadow-sm"
+                                                : "border-border/40 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                                        }`}
+                                    >
+                                        <p className='text-sm font-semibold'>{option.label}</p>
+                                        <p className='text-xs text-muted-foreground'>
+                                            {option.helper}
+                                        </p>
+                                    </button>
+                                ))}
+                            </div>
+                            <div className='rounded-xl border border-dashed border-border/50 bg-muted/20 p-3 text-sm'>
+                                <p className={`font-semibold ${statusInfo[currentStatus].tone}`}>
+                                    {statusInfo[currentStatus].label}
+                                </p>
+                                <p className='text-xs text-muted-foreground'>
+                                    {statusInfo[currentStatus].description}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className='border-border/50 shadow-sm'>
+                        <CardHeader>
+                            <CardTitle className='text-xl font-semibold tracking-tight'>
+                                Smart Break
+                            </CardTitle>
+                            <CardDescription>
+                                Tutup sementara 15–60 menit. Status akan otomatis kembali aktif.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className='space-y-4'>
+                            {currentStatus === "break" && activeBreak ? (
+                                <div className='rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700'>
+                                    <p className='font-semibold'>
+                                        Istirahat {activeBreak} menit
+                                    </p>
+                                    <p className='text-xs'>
+                                        Sistem akan mengaktifkan profilmu otomatis setelah break selesai.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className='rounded-xl border border-border/40 bg-muted/20 px-4 py-3 text-sm text-muted-foreground'>
+                                    <p className='font-semibold text-foreground'>
+                                        Tidak ada break yang aktif
+                                    </p>
+                                    <p className='text-xs'>
+                                        Gunakan Smart Break ketika perlu istirahat singkat tanpa mengganggu antrian pelanggan.
+                                    </p>
+                                </div>
+                            )}
+                            <div className='flex flex-wrap gap-2'>
+                                <Button
+                                    variant='outline'
+                                    className='border-border/60'
+                                    type='button'
+                                    onClick={() => setBreakDialogOpen(true)}
+                                >
+                                    Atur Smart Break
+                                </Button>
+                                {currentStatus === "break" ? (
+                                    <Button type='button' onClick={handleEndBreak}>
+                                        Akhiri sekarang
+                                    </Button>
+                                ) : null}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <Dialog
+                    open={isBreakDialogOpen}
+                    onOpenChange={(open) => setBreakDialogOpen(open)}
+                >
+                    <DialogContent className='max-w-md rounded-2xl border border-border/50 bg-card'>
+                        <DialogHeader>
+                            <DialogTitle>Smart Break</DialogTitle>
+                            <DialogDescription>
+                                Pilih durasi break. Status barber akan otomatis
+                                kembali aktif setelah waktu berakhir.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className='space-y-4'>
+                            <div className='grid grid-cols-2 gap-3 text-sm'>
+                                {breakDurations.map((duration) => (
+                                    <button
+                                        key={duration}
+                                        type='button'
+                                        onClick={() =>
+                                            setSelectedBreakDuration(duration)
+                                        }
+                                        className={`rounded-xl border px-4 py-3 font-semibold transition ${
+                                            selectedBreakDuration === duration
+                                                ? "border-primary bg-primary/10 text-primary"
+                                                : "border-border/40 text-muted-foreground hover:border-primary/40"
+                                        }`}
+                                    >
+                                        {duration} menit
+                                    </button>
+                                ))}
+                            </div>
+                            <p className='text-xs text-muted-foreground'>
+                                Kamu masih bisa mengakhiri break kapan saja sebelum waktu habis.
+                            </p>
+                        </div>
+                        <DialogFooter className='flex w-full flex-row-reverse gap-2'>
+                            <Button type='button' onClick={handleStartBreak}>
+                                Mulai break
+                            </Button>
+                            <Button
+                                type='button'
+                                variant='outline'
+                                className='border-border/60'
+                                onClick={() => setBreakDialogOpen(false)}
+                            >
+                                Batalkan
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </section>
 
             <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-8'>
