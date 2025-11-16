@@ -49,12 +49,16 @@ import {
 import { mockBranches } from "./_data/mock-branches";
 
 export default function OwnerCabangPage() {
-    const totalActive = mockBranches.filter((branch) => branch.status === "Aktif").length;
-    const totalPending = mockBranches.filter((branch) => branch.status === "Menunggu").length;
+    const totalActive = mockBranches.filter(
+        (branch) => branch.status === "Aktif"
+    ).length;
+    const totalPending = mockBranches.filter(
+        (branch) => branch.status === "Menunggu"
+    ).length;
 
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-3'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative space-y-6'>
                     <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/85 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
@@ -63,9 +67,13 @@ export default function OwnerCabangPage() {
                                 <Building2 className='h-4 w-4' />
                                 Multi Cabang
                             </div>
-                            <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>Kelola cabang TrimTime</h1>
+                            <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
+                                Kelola cabang TrimTime
+                            </h1>
                             <p className='text-sm text-muted-foreground lg:text-base'>
-                                Tambahkan cabang baru, atur jam buka, layanan, harga, dan foto agar tampil konsisten di aplikasi user.
+                                Tambahkan cabang baru, atur jam buka, layanan,
+                                harga, dan foto agar tampil konsisten di
+                                aplikasi user.
                             </p>
                         </div>
                         <div className='flex flex-wrap gap-3'>
@@ -75,36 +83,28 @@ export default function OwnerCabangPage() {
                                     Registrasi cabang baru
                                 </Link>
                             </Button>
-                            <Button variant='outline' className='border-border/60 gap-2'>
+                            <Button
+                                variant='outline'
+                                className='border-border/60 gap-2'
+                            >
                                 <UploadCloud className='h-4 w-4' />
                                 Import via template
                             </Button>
                         </div>
                     </div>
-                    <CardFooter className='grid gap-3 rounded-xl border border-border/40 bg-background/80 px-4 py-3 text-sm text-muted-foreground sm:grid-cols-2 lg:max-w-2xl'>
-                        <div className='flex items-center gap-2 rounded-lg border border-border/50 bg-card px-3 py-2'>
-                            <CheckCircle2 className='h-4 w-4 text-primary' />
-                            <div className='flex w-full items-center justify-between text-xs font-medium uppercase tracking-widest text-muted-foreground'>
-                                <span>Aktif</span>
-                                <span className='text-foreground'>{totalActive}</span>
-                            </div>
-                        </div>
-                        <div className='flex items-center gap-2 rounded-lg border border-border/50 bg-card px-3 py-2'>
-                            <Clock4 className='h-4 w-4 text-primary' />
-                            <div className='flex w-full items-center justify-between text-xs font-medium uppercase tracking-widest text-muted-foreground'>
-                                <span>Menunggu</span>
-                                <span className='text-foreground'>{totalPending}</span>
-                            </div>
-                        </div>
-                    </CardFooter>
                 </div>
             </section>
 
-            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-8'>
+            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-3'>
                 <Card className='border-border/50 shadow-sm'>
                     <CardHeader>
-                        <CardTitle className='text-xl font-semibold'>Daftar cabang</CardTitle>
-                        <CardDescription>Monitor status operasional setiap cabang, lengkap dengan okupansi kursi.</CardDescription>
+                        <CardTitle className='text-xl font-semibold'>
+                            Daftar cabang
+                        </CardTitle>
+                        <CardDescription>
+                            Monitor status operasional setiap cabang, lengkap
+                            dengan okupansi kursi.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className='overflow-x-auto'>
                         <Table>
@@ -115,15 +115,21 @@ export default function OwnerCabangPage() {
                                     <TableHead>Jam buka</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Okupansi</TableHead>
-                                    <TableHead className='w-[120px] text-right'>Aksi</TableHead>
+                                    <TableHead className='w-[120px] text-right'>
+                                        Aksi
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {mockBranches.map((branch) => (
                                     <TableRow key={branch.slug}>
-                                        <TableCell className='font-semibold text-foreground'>{branch.name}</TableCell>
+                                        <TableCell className='font-semibold text-foreground'>
+                                            {branch.name}
+                                        </TableCell>
                                         <TableCell>{branch.address}</TableCell>
-                                        <TableCell className='text-sm font-medium text-foreground'>{branch.schedule}</TableCell>
+                                        <TableCell className='text-sm font-medium text-foreground'>
+                                            {branch.schedule}
+                                        </TableCell>
                                         <TableCell>
                                             <Badge
                                                 variant='outline'
@@ -132,32 +138,61 @@ export default function OwnerCabangPage() {
                                                 {branch.status}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className='text-sm font-semibold text-foreground'>{branch.occupancy}</TableCell>
+                                        <TableCell className='text-sm font-semibold text-foreground'>
+                                            {branch.occupancy}
+                                        </TableCell>
                                         <TableCell className='text-right'>
                                             <div className='flex items-center justify-end gap-2'>
-                                                <Button variant='ghost' size='sm' className='gap-1 text-primary' asChild>
-                                                    <Link href={`/owner/cabang/${branch.slug}/edit`}>
+                                                <Button
+                                                    variant='ghost'
+                                                    size='sm'
+                                                    className='gap-1 text-primary'
+                                                    asChild
+                                                >
+                                                    <Link
+                                                        href={`/owner/cabang/${branch.slug}/edit`}
+                                                    >
                                                         <Pencil className='h-3.5 w-3.5' />
                                                         Edit
                                                     </Link>
                                                 </Button>
                                                 <AlertDialog>
                                                     <AlertDialogTrigger asChild>
-                                                        <Button variant='ghost' size='sm' className='gap-1 text-destructive hover:text-destructive'>
+                                                        <Button
+                                                            variant='ghost'
+                                                            size='sm'
+                                                            className='gap-1 text-destructive hover:text-destructive'
+                                                        >
                                                             <Trash2 className='h-3.5 w-3.5' />
                                                             Hapus
                                                         </Button>
                                                     </AlertDialogTrigger>
                                                     <AlertDialogContent>
                                                         <AlertDialogHeader>
-                                                            <AlertDialogTitle>Hapus cabang {branch.name}?</AlertDialogTitle>
+                                                            <AlertDialogTitle>
+                                                                Hapus cabang{" "}
+                                                                {branch.name}?
+                                                            </AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                Aksi ini akan menghapus cabang dari dashboard owner dan menghentikan booking pelanggan terkait.
-                                                                Kami sarankan mengarsipkan data terlebih dahulu sebelum melanjutkan.
+                                                                Aksi ini akan
+                                                                menghapus cabang
+                                                                dari dashboard
+                                                                owner dan
+                                                                menghentikan
+                                                                booking
+                                                                pelanggan
+                                                                terkait. Kami
+                                                                sarankan
+                                                                mengarsipkan
+                                                                data terlebih
+                                                                dahulu sebelum
+                                                                melanjutkan.
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
-                                                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                                                            <AlertDialogCancel>
+                                                                Batal
+                                                            </AlertDialogCancel>
                                                             <AlertDialogAction className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
                                                                 Ya, hapus cabang
                                                             </AlertDialogAction>
@@ -176,8 +211,13 @@ export default function OwnerCabangPage() {
                 <div className='grid gap-5 lg:grid-cols-[1.1fr_0.9fr]'>
                     <Card className='border-border/50 shadow-sm'>
                         <CardHeader>
-                            <CardTitle className='text-xl font-semibold'>Alur registrasi cabang</CardTitle>
-                            <CardDescription>Persiapkan dokumen agar verifikasi 1x24 jam berjalan mulus.</CardDescription>
+                            <CardTitle className='text-xl font-semibold'>
+                                Alur registrasi cabang
+                            </CardTitle>
+                            <CardDescription>
+                                Persiapkan dokumen agar verifikasi 1x24 jam
+                                berjalan mulus.
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className='space-y-4 text-sm text-muted-foreground'>
                             <ol className='space-y-3'>
@@ -186,7 +226,10 @@ export default function OwnerCabangPage() {
                                     "Tim Admin TrimTime melakukan verifikasi dan validasi koordinat.",
                                     "Saat status berubah menjadi aktif, cabang langsung tampil di aplikasi user.",
                                 ].map((item, index) => (
-                                    <li key={item} className='flex items-start gap-3 rounded-lg border border-border/40 bg-muted/10 px-3 py-2'>
+                                    <li
+                                        key={item}
+                                        className='flex items-start gap-3 rounded-lg border border-border/40 bg-muted/10 px-3 py-2'
+                                    >
                                         <span className='mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary'>
                                             {index + 1}
                                         </span>
@@ -201,9 +244,18 @@ export default function OwnerCabangPage() {
                                     Tips konversi tinggi
                                 </p>
                                 <ul className='mt-2 list-disc space-y-1 pl-5 text-sm'>
-                                    <li>Upload foto interior terang dan konsisten dengan brand.</li>
-                                    <li>Aktifkan layanan Home Service untuk cakupan area lebih luas.</li>
-                                    <li>Pastikan jam operasional update saat tanggal merah.</li>
+                                    <li>
+                                        Upload foto interior terang dan
+                                        konsisten dengan brand.
+                                    </li>
+                                    <li>
+                                        Aktifkan layanan Home Service untuk
+                                        cakupan area lebih luas.
+                                    </li>
+                                    <li>
+                                        Pastikan jam operasional update saat
+                                        tanggal merah.
+                                    </li>
                                 </ul>
                             </div>
                         </CardContent>
@@ -219,12 +271,19 @@ export default function OwnerCabangPage() {
                     </Card>
                     <Card className='border-border/50 shadow-sm'>
                         <CardHeader>
-                            <CardTitle className='text-xl font-semibold'>Jam operasional mingguan</CardTitle>
-                            <CardDescription>Sinkron dengan auto schedule TrimTime Premium.</CardDescription>
+                            <CardTitle className='text-xl font-semibold'>
+                                Jam operasional mingguan
+                            </CardTitle>
+                            <CardDescription>
+                                Sinkron dengan auto schedule TrimTime Premium.
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className='space-y-3'>
                             {mockBranches[0]?.weeklySchedule?.map((slot) => (
-                                <div key={slot} className='rounded-lg border border-border/40 bg-muted/15 px-3 py-2 text-sm text-muted-foreground'>
+                                <div
+                                    key={slot}
+                                    className='rounded-lg border border-border/40 bg-muted/15 px-3 py-2 text-sm text-muted-foreground'
+                                >
                                     <div className='flex items-center gap-2'>
                                         <Clock4 className='h-4 w-4 text-primary' />
                                         <span>{slot}</span>
@@ -236,9 +295,15 @@ export default function OwnerCabangPage() {
                                     <Sparkles className='h-4 w-4' />
                                     Tips coverage
                                 </p>
-                                <p>Tambah slot malam Jumat–Sabtu untuk cabang CBD, demand tinggi habis payday.</p>
+                                <p>
+                                    Tambah slot malam Jumat–Sabtu untuk cabang
+                                    CBD, demand tinggi habis payday.
+                                </p>
                             </div>
-                            <Button variant='outline' className='w-full border-border/60 gap-2'>
+                            <Button
+                                variant='outline'
+                                className='w-full border-border/60 gap-2'
+                            >
                                 <CalendarCog className='h-4 w-4' />
                                 Sinkron ke Google Calendar
                             </Button>

@@ -1,39 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback } from "react";
 import {
+    Activity,
     BadgeCheck,
-    CalendarCheck,
     CheckCircle2,
     Clock,
-    Phone,
     Filter,
+    MapPin,
     Menu,
     MessageCircle,
     PencilLine,
-    PlayCircle,
-    RefreshCcw,
+    Route,
     Search,
     Scissors,
     SquarePen,
-    Truck,
-    MapPin,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -50,15 +37,6 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import {
     Table,
     TableBody,
@@ -68,246 +46,25 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import type { LucideIcon } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
-
-const bookingSummary = [
-    {
-        label: "Menunggu konfirmasi",
-        value: 2,
-        helper: "Silakan validasi manual",
-        icon: Clock,
-    },
-    {
-        label: "Siap dimulai",
-        value: 3,
-        helper: "Freelancer standby di lokasi pelanggan",
-        icon: CalendarCheck,
-    },
-    {
-        label: "Home service aktif",
-        value: 1,
-        helper: "Pantau GPS secara berkala",
-        icon: Truck,
-    },
-    {
-        label: "Selesai hari ini",
-        value: 4,
-        helper: "Siap minta rating pelanggan",
-        icon: CheckCircle2,
-    },
-] as const;
-
-const bookingList = [
-    {
-        id: "HS-9921",
-        customer: "Mira Aulia",
-        initials: "MA",
-        phone: "0812-8890-1122",
-        schedule: "Selasa, 11 Feb • 08:30",
-        location: "Verde 2 Residence, Kuningan",
-        service: "Signature Home Grooming",
-        type: "Home visit",
-        status: "pending",
-        price: "Rp 350.000",
-    },
-    {
-        id: "HS-9922",
-        customer: "Satrio Pramana",
-        initials: "SP",
-        phone: "0813-2200-4422",
-        schedule: "Selasa, 11 Feb • 10:00",
-        location: "CoHive Citylofts, Sudirman",
-        service: "Office Pop-up Session",
-        type: "Office event",
-        status: "confirmed",
-        price: "Rp 275.000",
-    },
-    {
-        id: "HS-9923",
-        customer: "Reyhan Fadil",
-        initials: "RF",
-        phone: "0812-9988-7744",
-        schedule: "Selasa, 11 Feb • 12:30",
-        location: "Menara BCA Lt. 32",
-        service: "Executive Home Service",
-        type: "Home visit",
-        status: "ongoing",
-        price: "Rp 420.000",
-    },
-    {
-        id: "HS-9924",
-        customer: "Vino Mahardika",
-        initials: "VM",
-        phone: "0813-6655-2200",
-        schedule: "Selasa, 11 Feb • 15:00",
-        location: "Apartemen Botanica, Permata Hijau",
-        service: "Family Grooming Pack",
-        type: "Family session",
-        status: "completed",
-        price: "Rp 540.000",
-    },
-    {
-        id: "HS-9925",
-        customer: "Indra Syahputra",
-        initials: "IS",
-        phone: "0817-5522-3311",
-        schedule: "Selasa, 11 Feb • 17:00",
-        location: "Cluster Kemang Pratama",
-        service: "Nomad Groom Basic",
-        type: "Home visit",
-        status: "pending",
-        price: "Rp 280.000",
-    },
-] as const;
-
-const statusBadgeStyles = {
-    pending: "bg-amber-500/15 text-amber-600",
-    confirmed: "bg-primary/10 text-primary",
-    ongoing: "bg-sky-500/15 text-sky-600",
-    completed: "bg-emerald-500/15 text-emerald-600",
-} satisfies Record<string, string>;
-
-type BookingStatus = (typeof bookingList)[number]["status"];
-
-const statusLabels: Record<BookingStatus, string> = {
-    pending: "Menunggu konfirmasi",
-    confirmed: "Sudah dikonfirmasi",
-    ongoing: "Sedang berjalan",
-    completed: "Selesai",
-};
-
-const freelancerServices = [
-    {
-        id: "home-signature",
-        name: "Home Signature Fade",
-        description: "Paket grooming premium lengkap dengan styling matte.",
-        price: 320000,
-        duration: "45 menit",
-    },
-    {
-        id: "executive-deluxe",
-        name: "Executive Deluxe Visit",
-        description: "Haircut, beard trim, dan steam kecil langsung di rumah.",
-        price: 420000,
-        duration: "60 menit",
-    },
-    {
-        id: "family-pack",
-        name: "Family Grooming Pack",
-        description: "2 dewasa + 1 anak, cocok untuk sesi weekend di rumah.",
-        price: 540000,
-        duration: "90 menit",
-    },
-    {
-        id: "office-pop",
-        name: "Office Pop-up Session",
-        description: "Setup cepat untuk kantor/event dengan kursi portabel.",
-        price: 275000,
-        duration: "40 menit",
-    },
-    {
-        id: "travel-fee",
-        name: "Biaya perjalanan fleksibel",
-        description: "Tambahan transport sesuai radius kunjungan.",
-        price: 40000,
-        duration: "Opsional",
-    },
-] as const;
-
-const promoCatalog: Record<
-    string,
-    {
-        label: string;
-        discountType: "percent" | "amount";
-        value: number;
-        minSubtotal?: number;
-        notes?: string;
-    }
-> = {
-    TRIM10: {
-        label: "Diskon 10%",
-        discountType: "percent",
-        value: 0.1,
-        minSubtotal: 100000,
-        notes: "Minimal transaksi Rp 100.000",
-    },
-    VIP15: {
-        label: "Diskon Member 15%",
-        discountType: "percent",
-        value: 0.15,
-        notes: "Khusus pelanggan loyal",
-    },
-    HEMAT10K: {
-        label: "Potongan Rp 10.000",
-        discountType: "amount",
-        value: 10000,
-    },
-};
-
-const statusActions: Record<
-    BookingStatus,
-    Array<{
-        label: string;
-        description?: string;
-        icon: LucideIcon;
-        href?: string;
-    }>
-> = {
-    pending: [
-        {
-            label: "Konfirmasi booking",
-            description: "Kirim pemberitahuan ke pelanggan",
-            icon: CheckCircle2,
-        },
-        {
-            label: "Catat kedatangan manual",
-            description: "Gunakan jika pelanggan walk-in",
-            icon: SquarePen,
-        },
-    ],
-    confirmed: [
-        {
-            label: "Mulai layanan",
-            description: "Tandai freelancer sudah memulai sesi",
-            icon: PlayCircle,
-        },
-        {
-            label: "Update status / reschedule",
-            description: "Atur ulang waktu atau ganti freelancer cadangan",
-            icon: RefreshCcw,
-        },
-    ],
-    ongoing: [
-        {
-            label: "Kirim update ke pelanggan",
-            description: "Beritahu progres layanan",
-            icon: MessageCircle,
-        },
-        {
-            label: "Tandai layanan selesai",
-            description: "Tutup sesi dan buat ringkasan pembayaran",
-            icon: BadgeCheck,
-        },
-    ],
-    completed: [
-        {
-            label: "Kirim permintaan rating",
-            description: "Minta feedback otomatis",
-            icon: MessageCircle,
-        },
-        {
-            label: "Catatan layanan manual",
-            description: "Tambahkan highlight untuk riwayat",
-            icon: SquarePen,
-        },
-    ],
-};
+import {
+    freelancerBookingList,
+    freelancerBookingSummary,
+    freelancerQueueLine,
+    freelancerQueueStatusBadgeStyles,
+    freelancerQueueStatusLabels,
+    freelancerQueueTimeline,
+    freelancerQueueTimelineStyles,
+    freelancerStatusActions,
+    freelancerStatusBadgeStyles,
+    freelancerStatusLabels,
+    type FreelancerBookingStatus,
+} from "@/data/freelancer-booking";
 
 type BookingActionMenuProps = {
     bookingSlug: string;
     telHref: string;
-    status: BookingStatus;
+    status: FreelancerBookingStatus;
     handlePlaceholderAction: (event: Event) => void;
     align?: "start" | "center" | "end";
 };
@@ -344,10 +101,7 @@ function BookingActionMenu({
                 </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-                <a
-                    href={telHref}
-                    className='flex items-start gap-3 text-sm'
-                >
+                <a href={telHref} className='flex items-start gap-3 text-sm'>
                     <MessageCircle className='mt-0.5 h-4 w-4 text-primary' />
                     <div className='flex flex-col'>
                         <span className='font-semibold text-foreground'>
@@ -360,25 +114,27 @@ function BookingActionMenu({
                 </a>
             </DropdownMenuItem>
             <DropdownMenuSeparator className='bg-border/40' />
-            {statusActions[status]?.map(({ label, description, icon: Icon }) => (
-                <DropdownMenuItem
-                    key={label}
-                    onSelect={handlePlaceholderAction}
-                    className='flex items-start gap-3 text-sm text-muted-foreground'
-                >
-                    <Icon className='mt-0.5 h-4 w-4 text-primary' />
-                    <div className='flex flex-col'>
-                        <span className='font-semibold text-foreground'>
-                            {label}
-                        </span>
-                        {description ? (
-                            <span className='text-[11px] leading-snug text-muted-foreground'>
-                                {description}
+            {freelancerStatusActions[status]?.map(
+                ({ label, description, icon: Icon }) => (
+                    <DropdownMenuItem
+                        key={label}
+                        onSelect={handlePlaceholderAction}
+                        className='flex items-start gap-3 text-sm text-muted-foreground'
+                    >
+                        <Icon className='mt-0.5 h-4 w-4 text-primary' />
+                        <div className='flex flex-col'>
+                            <span className='font-semibold text-foreground'>
+                                {label}
                             </span>
-                        ) : null}
-                    </div>
-                </DropdownMenuItem>
-            ))}
+                            {description ? (
+                                <span className='text-[11px] leading-snug text-muted-foreground'>
+                                    {description}
+                                </span>
+                            ) : null}
+                        </div>
+                    </DropdownMenuItem>
+                )
+            )}
             <DropdownMenuSeparator className='bg-border/40' />
             <DropdownMenuItem
                 onSelect={handlePlaceholderAction}
@@ -399,118 +155,15 @@ function BookingActionMenu({
 }
 
 export default function FreelancerBookingPage() {
-    const [isManualDialogOpen, setManualDialogOpen] = useState(false);
-    const [manualForm, setManualForm] = useState({
-        customerName: "",
-        phone: "",
-        scheduleDate: "",
-        scheduleTime: "",
-        type: "home-service",
-        notes: "",
-        promoCode: "",
-    });
-    const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
-
     const handlePlaceholderAction = useCallback((event: Event) => {
         event.preventDefault();
     }, []);
 
-    const isManualFormValid = useMemo(() => {
-        return (
-            manualForm.customerName.trim().length > 0 &&
-            manualForm.phone.trim().length > 0 &&
-            manualForm.scheduleDate.trim().length > 0 &&
-            manualForm.scheduleTime.trim().length > 0 &&
-            selectedServiceIds.length > 0
-        );
-    }, [manualForm, selectedServiceIds]);
-
-    const handleManualFormChange = useCallback(
-        (field: keyof typeof manualForm, value: string) => {
-            setManualForm((prev) => ({
-                ...prev,
-                [field]: value,
-            }));
-        },
-        []
-    );
-
-    const toggleServiceSelection = useCallback((serviceId: string) => {
-        setSelectedServiceIds((prev) =>
-            prev.includes(serviceId)
-                ? prev.filter((id) => id !== serviceId)
-                : [...prev, serviceId]
-        );
-    }, []);
-
-    const formatCurrency = useCallback((value: number) => {
-        return new Intl.NumberFormat("id-ID", {
-            style: "currency",
-            currency: "IDR",
-            minimumFractionDigits: 0,
-        }).format(value);
-    }, []);
-
-    const selectedServices = useMemo(
-        () =>
-            freelancerServices.filter((service) =>
-                selectedServiceIds.includes(service.id)
-            ),
-        [selectedServiceIds]
-    );
-
-    const subtotal = useMemo(
-        () => selectedServices.reduce((acc, service) => acc + service.price, 0),
-        [selectedServices]
-    );
-
-    const appliedPromo = useMemo(() => {
-        const code = manualForm.promoCode.trim().toUpperCase();
-        return promoCatalog[code] ?? null;
-    }, [manualForm.promoCode]);
-
-    const promoIsEligible = useMemo(() => {
-        if (!appliedPromo) {
-            return false;
-        }
-        if (appliedPromo.minSubtotal && subtotal < appliedPromo.minSubtotal) {
-            return false;
-        }
-        return true;
-    }, [appliedPromo, subtotal]);
-
-    const discountValue = useMemo(() => {
-        if (!appliedPromo || !promoIsEligible) {
-            return 0;
-        }
-        if (appliedPromo.discountType === "percent") {
-            return Math.round(subtotal * appliedPromo.value);
-        }
-        return appliedPromo.value;
-    }, [appliedPromo, promoIsEligible, subtotal]);
-
-    const grandTotal = useMemo(
-        () => Math.max(subtotal - discountValue, 0),
-        [subtotal, discountValue]
-    );
-
-    const handleManualSubmit = useCallback(() => {
-        setManualDialogOpen(false);
-        setManualForm({
-            customerName: "",
-            phone: "",
-            scheduleDate: "",
-            scheduleTime: "",
-            type: "home-service",
-            notes: "",
-            promoCode: "",
-        });
-        setSelectedServiceIds([]);
-    }, []);
+    const activeQueue = freelancerQueueLine[0];
 
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 pt-8 pb-4 lg:px-8 lg:pt-9 lg:pb-4'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative space-y-6'>
                     <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
@@ -549,21 +202,21 @@ export default function FreelancerBookingPage() {
                         </div>
                         <div className='grid gap-3 text-xs text-muted-foreground sm:grid-cols-2 lg:w-auto lg:grid-cols-3'>
                             <div className='flex items-center gap-2 rounded-lg border border-border/40 bg-muted/15 px-3 py-2'>
-                                <Scissors className='h-4 w-4 text-primary' />
+                                <Route className='h-4 w-4 text-primary' />
                                 <div className='leading-tight'>
                                     <p className='text-xs font-semibold text-foreground'>
-                                        Slot aktif
+                                        Perjalanan aktif
                                     </p>
-                                    <p>Job tersisa: 5/12</p>
+                                    <p>Armada siap: 3/4</p>
                                 </div>
                             </div>
                             <div className='flex items-center gap-2 rounded-lg border border-border/40 bg-muted/15 px-3 py-2'>
                                 <MapPin className='h-4 w-4 text-primary' />
                                 <div className='leading-tight'>
                                     <p className='text-xs font-semibold text-foreground'>
-                                        Area Operasi
+                                        Basis freelancer
                                     </p>
-                                    <p>Jakarta Selatan • CBD</p>
+                                    <p>TrimTime HQ, SCBD</p>
                                 </div>
                             </div>
                             <div className='flex items-center gap-2 rounded-lg border border-border/40 bg-muted/15 px-3 py-2'>
@@ -572,433 +225,86 @@ export default function FreelancerBookingPage() {
                                     <p className='text-xs font-semibold text-foreground'>
                                         Jadwal berikutnya
                                     </p>
-                                    <p>08:30 WIB • 11 Feb</p>
+                                    <p>11 Feb • 13:30 WIB</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div className='relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between'>
-                        <div className='space-y-3'>
-                            <div className='inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary'>
-                                <Scissors className='h-4 w-4' />
-                                Board Home Service
-                            </div>
-                            <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
-                                Booking Freelancer Hari Ini
-                            </h1>
-                            <p className='max-w-2xl text-sm text-muted-foreground lg:text-base'>
-                                Kelola permintaan potong rambut on-demand,
-                                tetapkan slot perjalanan, dan update status
-                                langsung agar pelanggan mendapat kepastian
-                                kedatangan.
-                            </p>
-                        </div>
-                        <div className='flex flex-col gap-3 rounded-2xl border border-border/50 bg-card/80 p-4 shadow-sm backdrop-blur-sm lg:w-80'>
-                            <div className='flex items-center justify-between'>
-                                <span className='text-xs font-semibold uppercase tracking-widest text-muted-foreground'>
-                                    Agenda aktif
-                                </span>
-                                <Badge
-                                    variant='outline'
-                                    className='border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground'
-                                >
-                                    Auto-sync
-                                </Badge>
-                            </div>
-                            <div>
-                                <p className='text-2xl font-bold text-foreground'>
-                                    12 booking
-                                </p>
-                                <p className='text-xs text-muted-foreground'>
-                                    Termasuk 4 repeat clients & 2 kantor langganan.
-                                </p>
-                            </div>
-                            <Dialog
-                                open={isManualDialogOpen}
-                                onOpenChange={setManualDialogOpen}
-                            >
-                                <DialogTrigger asChild>
-                                    <Button type='button'>
-                                        Buat booking manual
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className='max-w-2xl overflow-hidden p-0'>
-                                    <div className='flex max-h-[85vh] flex-col'>
-                                        <DialogHeader className='px-6 pt-6 pb-4 text-left'>
-                                            <DialogTitle>
-                                                Booking manual pelanggan
-                                            </DialogTitle>
-                                            <DialogDescription>
-                                                Catat kedatangan walk-in atau
-                                                permintaan via telepon supaya
-                                                slot freelancer dan jarak
-                                                perjalanan tetap sinkron.
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <div className='flex-1 overflow-y-auto px-6 pb-6'>
-                                            <div className='space-y-4'>
-                                                <div className='grid gap-3 sm:grid-cols-2'>
-                                                    <div className='space-y-2'>
-                                                        <Label htmlFor='manual-name'>
-                                                            Nama pelanggan
-                                                        </Label>
-                                                        <Input
-                                                            id='manual-name'
-                                                            placeholder='Contoh: Dimas Saputra'
-                                                            value={
-                                                                manualForm.customerName
-                                                            }
-                                                            onChange={(event) =>
-                                                                handleManualFormChange(
-                                                                    "customerName",
-                                                                    event.target
-                                                                        .value
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className='space-y-2'>
-                                                        <Label htmlFor='manual-phone'>
-                                                            Nomor telepon
-                                                        </Label>
-                                                        <Input
-                                                            id='manual-phone'
-                                                            placeholder='Contoh: 0812xxxxxxx'
-                                                            value={
-                                                                manualForm.phone
-                                                            }
-                                                            onChange={(event) =>
-                                                                handleManualFormChange(
-                                                                    "phone",
-                                                                    event.target
-                                                                        .value
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <div className='space-y-2'>
-                                                    <Label>Pilih layanan</Label>
-                                                    <div className='space-y-2 rounded-xl border border-border/40 bg-muted/15 p-3'>
-                                                        {freelancerServices.map(
-                                                            (service) => {
-                                                                const isChecked =
-                                                                    selectedServiceIds.includes(
-                                                                        service.id
-                                                                    );
-                                                                return (
-                                                                    <label
-                                                                        key={
-                                                                            service.id
-                                                                        }
-                                                                        htmlFor={`service-${service.id}`}
-                                                                        className='flex flex-col gap-1 rounded-lg border border-transparent px-2 py-2 transition hover:bg-background/80'
-                                                                    >
-                                                                        <div className='flex items-start justify-between gap-3'>
-                                                                            <div className='flex items-start gap-3'>
-                                                                                <Checkbox
-                                                                                    id={`service-${service.id}`}
-                                                                                    checked={
-                                                                                        isChecked
-                                                                                    }
-                                                                                    onCheckedChange={() =>
-                                                                                        toggleServiceSelection(
-                                                                                            service.id
-                                                                                        )
-                                                                                    }
-                                                                                />
-                                                                                <div>
-                                                                                    <p className='text-sm font-semibold text-foreground'>
-                                                                                        {
-                                                                                            service.name
-                                                                                        }
-                                                                                    </p>
-                                                                                    <p className='text-xs text-muted-foreground'>
-                                                                                        {
-                                                                                            service.description
-                                                                                        }
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className='text-right text-sm font-semibold text-foreground'>
-                                                                                {formatCurrency(
-                                                                                    service.price
-                                                                                )}
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className='pl-8 text-[11px] uppercase tracking-widest text-muted-foreground'>
-                                                                            Durasi:{" "}
-                                                                            {
-                                                                                service.duration
-                                                                            }
-                                                                        </div>
-                                                                    </label>
-                                                                );
-                                                            }
-                                                        )}
-                                                    </div>
-                                                    {selectedServiceIds.length ===
-                                                    0 ? (
-                                                        <p className='text-[11px] text-destructive'>
-                                                            Pilih minimal satu
-                                                            layanan.
-                                                        </p>
-                                                    ) : null}
-                                                </div>
-
-                                                <div className='grid gap-3 sm:grid-cols-2'>
-                                                    <div className='space-y-2'>
-                                                        <Label htmlFor='manual-date'>
-                                                            Tanggal
-                                                        </Label>
-                                                        <Input
-                                                            id='manual-date'
-                                                            placeholder='mm/dd/yyyy'
-                                                            value={
-                                                                manualForm.scheduleDate
-                                                            }
-                                                            onChange={(event) =>
-                                                                handleManualFormChange(
-                                                                    "scheduleDate",
-                                                                    event.target
-                                                                        .value
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className='space-y-2'>
-                                                        <Label htmlFor='manual-time'>
-                                                            Waktu
-                                                        </Label>
-                                                        <Input
-                                                            id='manual-time'
-                                                            placeholder='--:-- --'
-                                                            value={
-                                                                manualForm.scheduleTime
-                                                            }
-                                                            onChange={(event) =>
-                                                                handleManualFormChange(
-                                                                    "scheduleTime",
-                                                                    event.target
-                                                                        .value
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <div className='space-y-2'>
-                                                    <Label>Tipe layanan</Label>
-                                                    <Select
-                                                        value={manualForm.type}
-                                                        onValueChange={(
-                                                            value
-                                                        ) =>
-                                                            handleManualFormChange(
-                                                                "type",
-                                                                value
-                                                            )
-                                                        }
-                                                    >
-                                                        <SelectTrigger id='manual-type'>
-                                                            <SelectValue placeholder='Pilih tipe layanan' />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value='home-service'>
-                                                                Home visit (rumah
-                                                                pelanggan)
-                                                            </SelectItem>
-                                                            <SelectItem value='office-pop'>
-                                                                Pop-up kantor /
-                                                                event
-                                                            </SelectItem>
-                                                            <SelectItem value='studio-share'>
-                                                                Sewa kursi
-                                                                studio kolaborasi
-                                                            </SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-
-                                                <div className='space-y-2'>
-                                                    <Label htmlFor='manual-notes'>
-                                                        Catatan tambahan
-                                                    </Label>
-                                                    <Textarea
-                                                        id='manual-notes'
-                                                        placeholder='Permintaan khusus, setup alat, atau catatan lokasi pelanggan.'
-                                                        value={manualForm.notes}
-                                                        onChange={(event) =>
-                                                            handleManualFormChange(
-                                                                "notes",
-                                                                event.target
-                                                                    .value
-                                                            )
-                                                        }
-                                                        rows={4}
-                                                    />
-                                                </div>
-
-                                                <div className='space-y-3 rounded-xl border border-border/40 bg-muted/15 p-3'>
-                                                    <div className='flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between'>
-                                                        <div className='w-full space-y-2 sm:max-w-xs'>
-                                                            <Label htmlFor='manual-promo'>
-                                                                Kode promo
-                                                            </Label>
-                                                            <Input
-                                                                id='manual-promo'
-                                                                placeholder='Contoh: TRIM10'
-                                                                value={
-                                                                    manualForm.promoCode
-                                                                }
-                                                                onChange={(
-                                                                    event
-                                                                ) =>
-                                                                    handleManualFormChange(
-                                                                        "promoCode",
-                                                                        event
-                                                                            .target
-                                                                            .value
-                                                                    )
-                                                                }
-                                                            />
-                                                        </div>
-                                                        {appliedPromo ? (
-                                                            <Badge
-                                                                variant='outline'
-                                                                className='w-fit border-primary/40 bg-primary/10 text-[11px] font-semibold uppercase tracking-widest text-primary'
-                                                            >
-                                                                {
-                                                                    appliedPromo.label
-                                                                }
-                                                            </Badge>
-                                                        ) : null}
-                                                    </div>
-                                                    {appliedPromo ? (
-                                                        <p className='text-xs text-muted-foreground'>
-                                                            {promoIsEligible
-                                                                ? "Promo diterapkan otomatis saat booking tersimpan."
-                                                                : appliedPromo.notes ??
-                                                                  "Promo belum memenuhi syarat."}
-                                                        </p>
-                                                    ) : (
-                                                        <p className='text-xs text-muted-foreground'>
-                                                            Masukkan kode promo
-                                                            pelanggan jika
-                                                            tersedia.
-                                                        </p>
-                                                    )}
-                                                </div>
-
-                                                <div className='space-y-2 rounded-xl border border-border/40 bg-background/80 p-4'>
-                                                    <p className='text-sm font-semibold text-foreground'>
-                                                        Ringkasan biaya
-                                                    </p>
-                                                    <div className='space-y-2 text-sm text-muted-foreground'>
-                                                        {selectedServices.length ===
-                                                        0 ? (
-                                                            <p className='text-xs text-muted-foreground'>
-                                                                Belum ada
-                                                                layanan yang
-                                                                dipilih.
-                                                            </p>
-                                                        ) : null}
-                                                        {selectedServices.map(
-                                                            (service) => (
-                                                                <div
-                                                                    key={`summary-${service.id}`}
-                                                                    className='flex items-center justify-between'
-                                                                >
-                                                                    <span>
-                                                                        {
-                                                                            service.name
-                                                                        }
-                                                                    </span>
-                                                                    <span className='font-medium text-foreground'>
-                                                                        {formatCurrency(
-                                                                            service.price
-                                                                        )}
-                                                                    </span>
-                                                                </div>
-                                                            )
-                                                        )}
-                                                        <div className='flex items-center justify-between pt-2 text-xs uppercase tracking-widest text-muted-foreground'>
-                                                            <span>
-                                                                Subtotal
-                                                            </span>
-                                                            <span className='text-sm font-semibold text-foreground'>
-                                                                {formatCurrency(
-                                                                    subtotal
-                                                                )}
-                                                            </span>
-                                                        </div>
-                                                        {discountValue > 0 ? (
-                                                            <div className='flex items-center justify-between text-xs uppercase tracking-widest text-emerald-600'>
-                                                                <span>
-                                                                    Diskon
-                                                                </span>
-                                                                <span className='text-sm font-semibold'>
-                                                                    -
-                                                                    {formatCurrency(
-                                                                        discountValue
-                                                                    )}
-                                                                </span>
-                                                            </div>
-                                                        ) : null}
-                                                        <div className='flex items-center justify-between border-t border-border/40 pt-3 text-sm font-semibold text-foreground'>
-                                                            <span>Total</span>
-                                                            <span>
-                                                                {formatCurrency(
-                                                                    grandTotal
-                                                                )}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <DialogFooter className='border-t border-border/40 '>
-                                                    <Button
-                                                        variant='outline'
-                                                        onClick={() =>
-                                                            setManualDialogOpen(
-                                                                false
-                                                            )
-                                                        }
-                                                    >
-                                                        Batalkan
-                                                    </Button>
-                                                    <Button
-                                                        onClick={
-                                                            handleManualSubmit
-                                                        }
-                                                        disabled={
-                                                            !isManualFormValid
-                                                        }
-                                                    >
-                                                        Simpan & konfirmasi
-                                                    </Button>
-                                                </DialogFooter>
-                                            </div>
-                                        </div>
+                        <Card className='border-border/50 bg-card/80 shadow-sm'>
+                            <CardContent className='grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center'>
+                                <div className='space-y-4'>
+                                    <div className='inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary'>
+                                        <Route className='h-4 w-4' />
+                                        Board Home Service
                                     </div>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
+                                    <div className='space-y-3'>
+                                        <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
+                                            Permintaan Freelancer Hari Ini
+                                        </h1>
+                                        <p className='max-w-2xl text-sm text-muted-foreground lg:text-base'>
+                                            Kelola home service, konfirmasi
+                                            keberangkatan, dan pastikan
+                                            pelanggan menerima update status
+                                            secara realtime.
+                                        </p>
+                                    </div>
+                                    <div className='flex flex-wrap gap-2 text-xs text-muted-foreground'>
+                                        <Badge className='bg-primary/10 text-primary'>
+                                            Auto-sync GPS
+                                        </Badge>
+                                        <Badge
+                                            variant='outline'
+                                            className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
+                                        >
+                                            Notifikasi WhatsApp & SMS
+                                        </Badge>
+                                    </div>
+                                </div>
+                                <div className='flex flex-col gap-3 rounded-2xl border border-border/50 bg-muted/20 p-4'>
+                                    <div className='flex items-center justify-between'>
+                                        <span className='text-xs font-semibold uppercase tracking-widest text-muted-foreground'>
+                                            Agenda aktif
+                                        </span>
+                                        <Badge
+                                            variant='outline'
+                                            className='border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground'
+                                        >
+                                            Auto-sync
+                                        </Badge>
+                                    </div>
+                                    <div>
+                                        <p className='text-2xl font-bold text-foreground'>
+                                            6 perjalanan
+                                        </p>
+                                        <p className='text-xs text-muted-foreground'>
+                                            Termasuk 2 kantor langganan & 1
+                                            family pack.
+                                        </p>
+                                    </div>
+                                    <Button asChild>
+                                        <Link href='/freelancer/jobs/new'>
+                                            Catat job manual
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
             </section>
 
-            <main className='space-y-7 px-5 py-6 lg:space-y-8 lg:px-8 lg:py-8'>
+            <main className='space-y-6 px-5 pt-4 pb-6 lg:space-y-7 lg:px-8 lg:pt-4 lg:pb-6'>
                 <Card className='border-border/50 shadow-sm'>
                     <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>
                         <div>
                             <CardTitle className='text-xl font-semibold tracking-tight'>
-                                Ringkasan antrian
+                                Ringkasan permintaan
                             </CardTitle>
                             <CardDescription>
-                                Prioritaskan konfirmasi manual agar pelanggan
-                                menerima notifikasi tepat waktu.
+                                Pantau slot OTW, tiba, dan progres layanan home
+                                service.
                             </CardDescription>
                         </div>
                         <div className='flex flex-wrap gap-2'>
@@ -1021,7 +327,7 @@ export default function FreelancerBookingPage() {
                         </div>
                     </CardHeader>
                     <CardContent className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
-                        {bookingSummary.map(
+                        {freelancerBookingSummary.map(
                             ({ label, value, helper, icon: Icon }) => (
                                 <div
                                     key={label}
@@ -1051,10 +357,166 @@ export default function FreelancerBookingPage() {
                 </Card>
 
                 <Card className='border-border/50 shadow-sm'>
+                    <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>
+                        <div>
+                            <CardTitle className='text-xl font-semibold tracking-tight'>
+                                Sistem antrian perjalanan
+                            </CardTitle>
+                            <CardDescription>
+                                Monitor perjalanan aktif dan request berikutnya.
+                            </CardDescription>
+                        </div>
+                        <Badge
+                            variant='outline'
+                            className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
+                        >
+                            Auto-sync GPS
+                        </Badge>
+                    </CardHeader>
+                    <CardContent className='grid gap-5 lg:grid-cols-[1.3fr_1fr]'>
+                        <div className='space-y-5'>
+                            <div className='rounded-2xl border border-border/50 bg-primary/5 p-5 shadow-sm'>
+                                <div className='flex flex-wrap items-start justify-between gap-3'>
+                                    <div>
+                                        <p className='text-xs font-semibold uppercase tracking-widest text-primary'>
+                                            Sedang dilayani
+                                        </p>
+                                        <p className='mt-1 text-2xl font-bold text-foreground'>
+                                            {activeQueue.customer}
+                                        </p>
+                                        <p className='text-sm text-muted-foreground'>
+                                            {activeQueue.service}
+                                        </p>
+                                    </div>
+                                    <Badge className='bg-primary text-primary-foreground shadow-sm'>
+                                        {activeQueue.chair}
+                                    </Badge>
+                                </div>
+                                <div className='mt-4 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2'>
+                                    <div className='flex items-center gap-2 rounded-xl border border-primary/20 bg-white/40 px-3 py-2 text-primary'>
+                                        <Clock className='h-4 w-4' />
+                                        Mulai {activeQueue.start}
+                                    </div>
+                                    <div className='flex items-center gap-2 rounded-xl border border-primary/20 bg-white/40 px-3 py-2 text-primary'>
+                                        <Activity className='h-4 w-4' />
+                                        {activeQueue.eta}
+                                    </div>
+                                </div>
+                                <div className='mt-5 space-y-3'>
+                                    <p className='text-xs font-semibold uppercase tracking-widest text-muted-foreground'>
+                                        Progress perjalanan
+                                    </p>
+                                    <div className='space-y-3'>
+                                        {freelancerQueueTimeline.map((step) => (
+                                            <div
+                                                key={step.label}
+                                                className='flex items-start gap-3 rounded-2xl border bg-card/80 p-3'
+                                            >
+                                                <span
+                                                    className={`flex h-10 w-10 items-center justify-center rounded-full border ${
+                                                        freelancerQueueTimelineStyles[
+                                                            step.status
+                                                        ]
+                                                    }`}
+                                                >
+                                                    {step.status === "done" ? (
+                                                        <CheckCircle2 className='h-4 w-4' />
+                                                    ) : step.status ===
+                                                      "current" ? (
+                                                        <Activity className='h-4 w-4' />
+                                                    ) : (
+                                                        <Clock className='h-4 w-4' />
+                                                    )}
+                                                </span>
+                                                <div className='space-y-1 text-sm'>
+                                                    <div className='flex flex-wrap items-center gap-2'>
+                                                        <p className='font-semibold text-foreground'>
+                                                            {step.label}
+                                                        </p>
+                                                        <Badge
+                                                            variant='outline'
+                                                            className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
+                                                        >
+                                                            {step.time}
+                                                        </Badge>
+                                                    </div>
+                                                    <p className='text-xs leading-relaxed text-muted-foreground'>
+                                                        {step.note}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className='space-y-3'>
+                            <div className='flex items-center justify-between'>
+                                <p className='text-xs font-semibold uppercase tracking-widest text-muted-foreground'>
+                                    Request berikutnya
+                                </p>
+                                <Badge
+                                    variant='outline'
+                                    className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
+                                >
+                                    {freelancerQueueLine.length - 1} request
+                                </Badge>
+                            </div>
+                            <div className='space-y-3'>
+                                {freelancerQueueLine.slice(1).map((queue) => (
+                                    <div
+                                        key={queue.id}
+                                        className='rounded-2xl border border-border/40 bg-muted/20 p-4'
+                                    >
+                                        <div className='flex items-start justify-between gap-3'>
+                                            <div>
+                                                <p className='text-sm font-semibold text-foreground'>
+                                                    {queue.customer}
+                                                </p>
+                                                <p className='text-xs uppercase tracking-widest text-muted-foreground'>
+                                                    {queue.id}
+                                                </p>
+                                            </div>
+                                            <Badge
+                                                className={
+                                                    freelancerQueueStatusBadgeStyles[
+                                                        queue.status
+                                                    ]
+                                                }
+                                            >
+                                                {
+                                                    freelancerQueueStatusLabels[
+                                                        queue.status
+                                                    ]
+                                                }
+                                            </Badge>
+                                        </div>
+                                        <div className='mt-3 space-y-1 text-xs text-muted-foreground'>
+                                            <p className='inline-flex items-center gap-1'>
+                                                <Scissors className='h-3.5 w-3.5 text-primary' />
+                                                {queue.service}
+                                            </p>
+                                            <p className='inline-flex items-center gap-1'>
+                                                <Clock className='h-3.5 w-3.5 text-primary' />
+                                                {queue.start} • {queue.eta}
+                                            </p>
+                                            <p className='inline-flex items-center gap-1'>
+                                                <MapPin className='h-3.5 w-3.5 text-primary' />
+                                                {queue.chair}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className='border-border/50 shadow-sm'>
                     <CardHeader className='flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
                         <div>
                             <CardTitle className='text-xl font-semibold tracking-tight'>
-                                Daftar booking
+                                Daftar home service
                             </CardTitle>
                             <CardDescription>
                                 Update status: konfirmasi → mulai → selesai agar
@@ -1080,16 +542,18 @@ export default function FreelancerBookingPage() {
                     </CardHeader>
                     <CardContent className='space-y-4'>
                         <div className='space-y-3 lg:hidden'>
-                            {bookingList.map((item) => {
-                                const bookingSlug = item.id.toLowerCase();
+                            {freelancerBookingList.map((item) => {
                                 const phoneDigits = item.phone.replace(
                                     /\D/g,
                                     ""
                                 );
-                                const dialNumber = phoneDigits.startsWith("0")
-                                    ? `62${phoneDigits.slice(1)}`
-                                    : phoneDigits;
-                                const telHref = `tel:+${dialNumber}`;
+                                const telHref = phoneDigits
+                                    ? `tel:+${
+                                          phoneDigits.startsWith("0")
+                                              ? `62${phoneDigits.slice(1)}`
+                                              : phoneDigits
+                                      }`
+                                    : "tel:+62";
                                 return (
                                     <div
                                         key={`${item.id}-compact`}
@@ -1144,103 +608,71 @@ export default function FreelancerBookingPage() {
                                         <div className='flex flex-wrap items-center gap-2'>
                                             <Badge
                                                 className={
-                                                    statusBadgeStyles[
+                                                    freelancerStatusBadgeStyles[
                                                         item.status
                                                     ]
                                                 }
                                             >
-                                                {statusLabels[item.status]}
+                                                {
+                                                    freelancerStatusLabels[
+                                                        item.status
+                                                    ]
+                                                }
                                             </Badge>
-                                        </div>
-                                        <div className='flex flex-wrap items-center gap-2'>
-                                            <Button size='sm' asChild>
-                                                <Link
-                                                    href={`/freelancer/jobs/${bookingSlug}`}
-                                                    className='inline-flex items-center gap-2'
-                                                >
-                                                    <BadgeCheck className='h-3.5 w-3.5' />
-                                                    Detail booking
-                                                </Link>
-                                            </Button>
                                             <Button
                                                 size='sm'
                                                 variant='outline'
                                                 className='border-border/60'
                                                 asChild
                                             >
-                                                <a
-                                                    href={telHref}
-                                                    className='inline-flex items-center gap-2'
-                                                >
-                                                    <Phone className='h-3.5 w-3.5' />
-                                                    Hubungi pelanggan
+                                                <a href={telHref}>
+                                                    Telepon pelanggan
                                                 </a>
                                             </Button>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        size='sm'
-                                                        variant='outline'
-                                                        className='border-border/60'
-                                                    >
-                                                        Tindakan lain
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <BookingActionMenu
-                                                    bookingSlug={bookingSlug}
-                                                    telHref={telHref}
-                                                    status={item.status}
-                                                    handlePlaceholderAction={
-                                                        handlePlaceholderAction
-                                                    }
-                                                    align='start'
-                                                />
-                                            </DropdownMenu>
                                         </div>
                                     </div>
                                 );
                             })}
                         </div>
-                        <div className='hidden overflow-x-auto lg:block'>
-                            <Table className='min-w-[960px]'>
+
+                        <div className='space-y-3 max-lg:hidden'>
+                            <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className='whitespace-nowrap text-xs uppercase tracking-widest text-muted-foreground'>
-                                            Pelanggan
-                                        </TableHead>
-                                        <TableHead className='whitespace-nowrap text-xs uppercase tracking-widest text-muted-foreground'>
-                                            Jadwal & Lokasi
-                                        </TableHead>
-                                        <TableHead className='whitespace-nowrap text-xs uppercase tracking-widest text-muted-foreground'>
-                                            Layanan
-                                        </TableHead>
-                                        <TableHead className='whitespace-nowrap text-xs uppercase tracking-widest text-muted-foreground'>
+                                        <TableHead>Pelanggan</TableHead>
+                                        <TableHead>Jadwal & lokasi</TableHead>
+                                        <TableHead>Layanan</TableHead>
+                                        <TableHead className='text-center'>
                                             Tipe
                                         </TableHead>
-                                        <TableHead className='whitespace-nowrap text-xs uppercase tracking-widest text-muted-foreground'>
+                                        <TableHead className='text-center'>
                                             Status
                                         </TableHead>
-                                        <TableHead className='whitespace-nowrap text-right text-xs uppercase tracking-widest text-muted-foreground'>
+                                        <TableHead className='text-right'>
                                             Tarif
                                         </TableHead>
-                                        <TableHead className='whitespace-nowrap text-right text-xs uppercase tracking-widest text-muted-foreground'>
+                                        <TableHead className='text-right'>
                                             Aksi
                                         </TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {bookingList.map((item) => {
-                                        const bookingSlug = item.id.toLowerCase();
+                                    {freelancerBookingList.map((item) => {
+                                        const bookingSlug =
+                                            item.id.toLowerCase();
                                         const phoneDigits = item.phone.replace(
                                             /\D/g,
                                             ""
                                         );
-                                        const dialNumber = phoneDigits.startsWith(
-                                            "0"
-                                        )
-                                            ? `62${phoneDigits.slice(1)}`
-                                            : phoneDigits;
-                                        const telHref = `tel:+${dialNumber}`;
+                                        const telHref = phoneDigits
+                                            ? `tel:+${
+                                                  phoneDigits.startsWith("0")
+                                                      ? `62${phoneDigits.slice(
+                                                            1
+                                                        )}`
+                                                      : phoneDigits
+                                              }`
+                                            : "tel:+62";
                                         return (
                                             <TableRow
                                                 key={item.id}
@@ -1251,7 +683,9 @@ export default function FreelancerBookingPage() {
                                                         <Avatar className='h-9 w-9 border border-border/40'>
                                                             <AvatarImage
                                                                 src='/placeholder.jpg'
-                                                                alt={item.customer}
+                                                                alt={
+                                                                    item.customer
+                                                                }
                                                             />
                                                             <AvatarFallback className='bg-primary/10 text-xs font-semibold text-primary'>
                                                                 {item.initials}
@@ -1267,25 +701,20 @@ export default function FreelancerBookingPage() {
                                                         </div>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className='align-top'>
-                                                    <div className='space-y-1 text-xs text-muted-foreground'>
-                                                        <span className='inline-flex items-center gap-1'>
-                                                            <Clock className='h-3.5 w-3.5 text-primary' />
-                                                            {item.schedule}
-                                                        </span>
-                                                        <span className='inline-flex items-center gap-1'>
-                                                            <MapPin className='h-3.5 w-3.5 text-primary' />
-                                                            {item.location}
-                                                        </span>
-                                                    </div>
+                                                <TableCell className='align-top text-xs text-muted-foreground'>
+                                                    <p className='flex items-center gap-2'>
+                                                        <Clock className='h-3.5 w-3.5 text-primary' />
+                                                        {item.schedule}
+                                                    </p>
+                                                    <p className='flex items-center gap-2'>
+                                                        <MapPin className='h-3.5 w-3.5 text-primary' />
+                                                        {item.location}
+                                                    </p>
                                                 </TableCell>
-                                                <TableCell className='align-top'>
-                                                    <div className='inline-flex items-center gap-2 text-xs text-muted-foreground'>
-                                                        <Scissors className='h-3.5 w-3.5 text-primary' />
-                                                        {item.service}
-                                                    </div>
+                                                <TableCell className='align-top text-sm text-foreground'>
+                                                    {item.service}
                                                 </TableCell>
-                                                <TableCell className='align-top'>
+                                                <TableCell className='align-top text-center'>
                                                     <Badge
                                                         variant='outline'
                                                         className='border-border/50 bg-muted/10 text-xs text-muted-foreground'
@@ -1293,15 +722,19 @@ export default function FreelancerBookingPage() {
                                                         {item.type}
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell className='align-top'>
+                                                <TableCell className='align-top text-center'>
                                                     <Badge
                                                         className={
-                                                            statusBadgeStyles[
+                                                            freelancerStatusBadgeStyles[
                                                                 item.status
                                                             ]
                                                         }
                                                     >
-                                                        {statusLabels[item.status]}
+                                                        {
+                                                            freelancerStatusLabels[
+                                                                item.status
+                                                            ]
+                                                        }
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell className='align-top text-right text-sm font-semibold text-foreground'>
@@ -1322,7 +755,9 @@ export default function FreelancerBookingPage() {
                                                             </Button>
                                                         </DropdownMenuTrigger>
                                                         <BookingActionMenu
-                                                            bookingSlug={bookingSlug}
+                                                            bookingSlug={
+                                                                bookingSlug
+                                                            }
                                                             telHref={telHref}
                                                             status={item.status}
                                                             handlePlaceholderAction={
@@ -1336,9 +771,9 @@ export default function FreelancerBookingPage() {
                                     })}
                                 </TableBody>
                                 <TableCaption>
-                                    Data di-update otomatis dari aplikasi TrimTime.
-                                    Pastikan status diperbarui agar pelanggan
-                                    mendapat notifikasi realtime.
+                                    Data di-update otomatis dari aplikasi
+                                    TrimTime. Pastikan status diperbarui agar
+                                    pelanggan mendapat notifikasi realtime.
                                 </TableCaption>
                             </Table>
                         </div>

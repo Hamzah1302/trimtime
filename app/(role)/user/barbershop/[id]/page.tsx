@@ -4,16 +4,19 @@ import {
     ArrowRight,
     CheckCircle2,
     Clock,
+    Home,
     MapPin,
     Share2,
     ShieldCheck,
     Star,
+    Store,
 } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { barbershopDatabase } from "@/data/barbershops";
+import type { BarbershopDetail } from "@/data/barbershops";
 
 export default async function BarbershopDetailPage({
     params,
@@ -21,7 +24,36 @@ export default async function BarbershopDetailPage({
     params: Promise<{ id: string }>;
 }) {
     const { id } = await params;
-    const barbershop = barbershopDatabase.details[id];
+    const summary = barbershopDatabase.list.find((entry) => entry.id === id);
+    const detailFromDatabase = barbershopDatabase.details[id];
+    const isFreelancer = summary?.type === "freelancer";
+
+    const fallbackServices = summary?.services.map((serviceName) => ({
+        name: serviceName,
+        description: `Paket ${serviceName} oleh ${summary.name}.`,
+        price: summary.price,
+        duration: isFreelancer ? "45 menit" : "60 menit",
+        allowBarberChoice: true,
+    }));
+
+    const fallbackDetail: BarbershopDetail | undefined = summary
+        ? {
+              id: summary.id,
+              name: summary.name,
+              address: summary.address,
+              rating: summary.rating,
+              reviewCount: summary.ratingCount,
+              description: `Layanan fleksibel oleh ${summary.name}.`,
+              status: summary.status,
+              photos: summary.heroImage ? [summary.heroImage] : [],
+              barbers: [],
+              services: fallbackServices ?? [],
+              benefits: summary.tags,
+              comments: [],
+          }
+        : undefined;
+
+    const barbershop = detailFromDatabase ?? fallbackDetail;
 
     if (!barbershop) {
         return (
@@ -45,8 +77,11 @@ export default async function BarbershopDetailPage({
         );
     }
 
-    const heroImage = barbershop.photos[0];
+    const heroImage =
+        barbershop.photos[0] ?? summary?.heroImage ?? "/placeholder.jpg";
     const comments = barbershop.comments;
+    const supportsHomeService = summary?.supportsHomeService;
+    const supportsOnSite = summary?.supportsOnSite;
 
     return (
         <PageShell background='soft' contentClassName='gap-0'>
@@ -76,8 +111,14 @@ export default async function BarbershopDetailPage({
                         <div className='absolute inset-x-0 bottom-0 p-5 lg:p-8'>
                             <div className='space-y-3'>
                                 <div className='inline-flex items-center gap-2 rounded-full bg-primary/90 px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg backdrop-blur-sm'>
-                                    <ShieldCheck className='h-3.5 w-3.5' />
-                                    Premium Verified
+                                    {isFreelancer ? (
+                                        <Home className='h-3.5 w-3.5' />
+                                    ) : (
+                                        <ShieldCheck className='h-3.5 w-3.5' />
+                                    )}
+                                    {isFreelancer
+                                        ? "Freelancer Mobile"
+                                        : "Premium Verified"}
                                 </div>
                                 <h1 className='text-3xl lg:text-4xl font-bold leading-tight tracking-tight text-white drop-shadow-lg'>
                                     {barbershop.name}
@@ -143,6 +184,42 @@ export default async function BarbershopDetailPage({
                                     </span>
                                 ))}
                             </div>
+                            {isFreelancer ? (
+                                <div className='grid gap-3 rounded-2xl border border-border/50 bg-muted/20 p-4 text-sm text-muted-foreground sm:grid-cols-2'>
+                                    <div className='flex flex-col gap-1 rounded-xl border border-border/40 bg-background/80 p-4'>
+                                        <p className='text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                                            Mode layanan
+                                        </p>
+                                        <div className='flex flex-wrap gap-2 text-xs font-semibold'>
+                                            {supportsOnSite ? (
+                                                <span className='inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700'>
+                                                    <Store className='h-3 w-3' />
+                                                    On-site
+                                                </span>
+                                            ) : null}
+                                            {supportsHomeService ? (
+                                                <span className='inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-blue-700'>
+                                                    <Home className='h-3 w-3' />
+                                                    Home service
+                                                </span>
+                                            ) : null}
+                                        </div>
+                                    </div>
+                                    <div className='flex flex-col gap-1 rounded-xl border border-border/40 bg-background/80 p-4'>
+                                        <p className='text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                                            Estimasi respon
+                                        </p>
+                                        <p className='text-base font-bold text-foreground'>
+                                            {summary?.distance ??
+                                                "Manual confirm"}
+                                        </p>
+                                        <p className='text-xs text-muted-foreground'>
+                                            Rata-rata waktu konfirmasi
+                                            freelancer
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : null}
                         </div>
                     </div>
                 </section>
@@ -209,104 +286,111 @@ export default async function BarbershopDetailPage({
                         ))}
                     </div>
                 </section>
-                <section className='space-y-5 bg-muted/30 px-5 py-8 lg:px-8'>
-                    <div>
-                        <h2 className='text-xl font-bold tracking-tight lg:text-2xl'>
-                            Tim Barber Profesional
-                        </h2>
-                        <p className='mt-1 text-sm text-muted-foreground'>
-                            Dipilih dan terverifikasi untuk kualitas terbaik
-                        </p>
-                    </div>
-                    <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-                        {barbershop.barbers.map((barber) => (
-                            <div
-                                key={barber.id}
-                                className='group relative overflow-hidden rounded-xl border border-border/50 bg-card p-5 shadow-sm transition-all hover:shadow-lg hover:border-primary/30'
-                            >
-                                <div className='absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full bg-primary/5 blur-2xl transition-transform group-hover:scale-150' />
-                                <div className='relative space-y-4'>
-                                    <div className='flex items-start gap-4'>
-                                        <Avatar className='h-16 w-16 border-2 border-primary/20 shadow-md ring-2 ring-background'>
-                                            <AvatarImage
-                                                src={barber.avatar}
-                                                alt={barber.name}
-                                            />
-                                            <AvatarFallback className='bg-primary/10 text-primary text-lg font-bold'>
-                                                {barber.name
-                                                    .split(" ")
-                                                    .map((n) => n[0])
-                                                    .join("")}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div className='flex-1 space-y-1'>
-                                            <h3 className='font-bold tracking-tight text-foreground'>
-                                                {barber.name}
-                                            </h3>
-                                            <div className='inline-flex items-center gap-1 rounded-full bg-yellow-500/10 px-2 py-0.5'>
-                                                <Star className='h-3.5 w-3.5 fill-yellow-500 text-yellow-500' />
-                                                <span className='text-xs font-bold text-yellow-700 dark:text-yellow-400'>
-                                                    {barber.rating}
-                                                </span>
+                {!isFreelancer ? (
+                    <>
+                        <section className='space-y-5 bg-muted/30 px-5 py-8 lg:px-8'>
+                            <div>
+                                <h2 className='text-xl font-bold tracking-tight lg:text-2xl'>
+                                    Tim Barber Profesional
+                                </h2>
+                                <p className='mt-1 text-sm text-muted-foreground'>
+                                    Dipilih dan terverifikasi untuk kualitas
+                                    terbaik
+                                </p>
+                            </div>
+                            <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+                                {barbershop.barbers.map((barber) => (
+                                    <div
+                                        key={barber.id}
+                                        className='group relative overflow-hidden rounded-xl border border-border/50 bg-card p-5 shadow-sm transition-all hover:shadow-lg hover:border-primary/30'
+                                    >
+                                        <div className='absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full bg-primary/5 blur-2xl transition-transform group-hover:scale-150' />
+                                        <div className='relative space-y-4'>
+                                            <div className='flex items-start gap-4'>
+                                                <Avatar className='h-16 w-16 border-2 border-primary/20 shadow-md ring-2 ring-background'>
+                                                    <AvatarImage
+                                                        src={barber.avatar}
+                                                        alt={barber.name}
+                                                    />
+                                                    <AvatarFallback className='bg-primary/10 text-primary text-lg font-bold'>
+                                                        {barber.name
+                                                            .split(" ")
+                                                            .map((n) => n[0])
+                                                            .join("")}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div className='flex-1 space-y-1'>
+                                                    <h3 className='font-bold tracking-tight text-foreground'>
+                                                        {barber.name}
+                                                    </h3>
+                                                    <div className='inline-flex items-center gap-1 rounded-full bg-yellow-500/10 px-2 py-0.5'>
+                                                        <Star className='h-3.5 w-3.5 fill-yellow-500 text-yellow-500' />
+                                                        <span className='text-xs font-bold text-yellow-700 dark:text-yellow-400'>
+                                                            {barber.rating}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div className='space-y-2 text-sm'>
-                                        <div className='flex items-center gap-2 text-muted-foreground'>
-                                            <CheckCircle2 className='h-4 w-4 text-primary' />
-                                            <span className='font-medium'>
-                                                {barber.experience}
-                                            </span>
-                                        </div>
-                                        <div className='flex flex-wrap gap-1'>
-                                            {barber.specialties.map(
-                                                (specialty) => (
-                                                    <span
-                                                        key={specialty}
-                                                        className='rounded-md bg-primary/5 px-2 py-1 text-xs font-medium text-primary'
-                                                    >
-                                                        {specialty}
+                                            <div className='space-y-2 text-sm'>
+                                                <div className='flex items-center gap-2 text-muted-foreground'>
+                                                    <CheckCircle2 className='h-4 w-4 text-primary' />
+                                                    <span className='font-medium'>
+                                                        {barber.experience}
                                                     </span>
-                                                )
-                                            )}
+                                                </div>
+                                                <div className='flex flex-wrap gap-1'>
+                                                    {barber.specialties.map(
+                                                        (specialty) => (
+                                                            <span
+                                                                key={specialty}
+                                                                className='rounded-md bg-primary/5 px-2 py-1 text-xs font-medium text-primary'
+                                                            >
+                                                                {specialty}
+                                                            </span>
+                                                        )
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <Button className='w-full rounded-lg bg-primary font-medium shadow-sm transition-all hover:bg-primary/90 hover:shadow'>
+                                                Pilih Barber
+                                            </Button>
                                         </div>
                                     </div>
-                                    <Button className='w-full rounded-lg bg-primary font-medium shadow-sm transition-all hover:bg-primary/90 hover:shadow'>
-                                        Pilih Barber
-                                    </Button>
-                                </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                </section>
-                <section className='space-y-5 px-5 py-6 lg:px-8'>
-                    <div>
-                        <h2 className='text-xl font-bold tracking-tight lg:text-2xl'>
-                            Galeri Barbershop
-                        </h2>
-                        <p className='mt-1 text-sm text-muted-foreground'>
-                            Lihat suasana dan hasil karya kami
-                        </p>
-                    </div>
-                    <div className='grid grid-cols-2 gap-3 lg:grid-cols-4'>
-                        {barbershop.photos.map((photo, index) => (
-                            <div
-                                key={photo + index}
-                                className={`group relative overflow-hidden rounded-xl border border-border/50 shadow-sm transition-all hover:shadow-lg ${
-                                    index === 0
-                                        ? "col-span-2 row-span-2 h-64 lg:h-80"
-                                        : "h-32 lg:h-40"
-                                }`}
-                            >
-                                <div
-                                    className='absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110'
-                                    style={{ backgroundImage: `url(${photo})` }}
-                                />
-                                <div className='absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20' />
+                        </section>
+                        <section className='space-y-5 px-5 py-6 lg:px-8'>
+                            <div>
+                                <h2 className='text-xl font-bold tracking-tight lg:text-2xl'>
+                                    Galeri Barbershop
+                                </h2>
+                                <p className='mt-1 text-sm text-muted-foreground'>
+                                    Lihat suasana dan hasil karya kami
+                                </p>
                             </div>
-                        ))}
-                    </div>
-                </section>
+                            <div className='grid grid-cols-2 gap-3 lg:grid-cols-4'>
+                                {barbershop.photos.map((photo, index) => (
+                                    <div
+                                        key={photo + index}
+                                        className={`group relative overflow-hidden rounded-xl border border-border/50 shadow-sm transition-all hover:shadow-lg ${
+                                            index === 0
+                                                ? "col-span-2 row-span-2 h-64 lg:h-80"
+                                                : "h-32 lg:h-40"
+                                        }`}
+                                    >
+                                        <div
+                                            className='absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110'
+                                            style={{
+                                                backgroundImage: `url(${photo})`,
+                                            }}
+                                        />
+                                        <div className='absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20' />
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    </>
+                ) : null}
                 <section className='space-y-5 bg-muted/30 px-5 py-8 lg:px-8'>
                     <div className='flex items-end justify-between'>
                         <div>

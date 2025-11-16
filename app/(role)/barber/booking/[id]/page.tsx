@@ -10,10 +10,8 @@ import {
     MessageCircle,
     Phone,
     Send,
-    ShieldCheck,
     SquarePen,
     UserCheck,
-    UserRound,
     Wallet,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -31,7 +29,13 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { bookingDetails } from "@/data/barber-booking";
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -55,9 +59,19 @@ type ProgressStatusCardConfig = {
     surfaceClass: string;
     iconClass: string;
     primaryLabel?: string;
-    primaryVariant: "default" | "secondary" | "outline" | "destructive" | "ghost";
+    primaryVariant:
+        | "default"
+        | "secondary"
+        | "outline"
+        | "destructive"
+        | "ghost";
     secondaryLabel?: string;
-    secondaryVariant: "default" | "secondary" | "outline" | "destructive" | "ghost";
+    secondaryVariant:
+        | "default"
+        | "secondary"
+        | "outline"
+        | "destructive"
+        | "ghost";
 };
 
 const progressStatusContent: Record<
@@ -158,188 +172,6 @@ const progressStatusContent: Record<
             | "ghost";
     }
 >;
-
-type BookingDetail = {
-    id: string;
-    externalId: string;
-    status: keyof typeof statusBadgeStyles;
-    statusLabel: string;
-    customer: {
-        name: string;
-        initials: string;
-        phone: string;
-        location: string;
-        memberSince: string;
-    };
-    schedule: {
-        date: string;
-        time: string;
-        duration: string;
-        room: string;
-    };
-    service: {
-        name: string;
-        barber: string;
-        notes: string;
-        channel: string;
-    };
-    payment: {
-        items: Array<{ name: string; price: number }>;
-        subtotal: number;
-        discount: number;
-        total: number;
-        promoCode?: string;
-        method: string;
-        tip: string;
-        status: string;
-        proofImage?: string;
-        proofUploadedAt?: string;
-    };
-    timeline: Array<{
-        time: string;
-        title: string;
-        description: string;
-        icon: typeof CalendarClock;
-        status?: "upcoming";
-    }>;
-    progress: number;
-    actionLabel: string;
-};
-
-const bookingDetails: Record<string, BookingDetail> = {
-    "tt-3021": {
-        id: "TT-3021",
-        externalId: "INV-9041",
-        status: "pending",
-        statusLabel: "Menunggu check-in",
-        customer: {
-            name: "Dimas Saputra",
-            initials: "DS",
-            phone: "0812-8890-1122",
-            location: "Menara BCA, Jakarta",
-            memberSince: "Agustus 2023",
-        },
-        schedule: {
-            date: "Selasa, 11 Feb 2025",
-            time: "09:00 WIB",
-            duration: "60 menit",
-            room: "Kursi 2 • Area Signature Fade",
-        },
-        service: {
-            name: "Signature Fade + Steam",
-            barber: "Rama Putra",
-            notes: "Tambahkan steam therapy 10 menit. Pelanggan suka finishing matte.",
-            channel: "Walk-in",
-        },
-        payment: {
-            items: [
-                { name: "Skin Fade Premium", price: 65000 },
-                { name: "Steam Therapy", price: 20000 },
-            ],
-            subtotal: 85000,
-            discount: 8500,
-            total: 76500,
-            promoCode: "TRIM10",
-            method: "QRIS",
-            tip: "Belum diatur",
-            status: "Lunas",
-            proofImage: "/payment-proof-sample.jpg",
-            proofUploadedAt: "11 Feb 2025, 08:45 WIB",
-        },
-        timeline: [
-            {
-                time: "08:30",
-                title: "Reminder dikirim",
-                description:
-                    "Sistem mengirim notifikasi WhatsApp otomatis ke pelanggan.",
-                icon: BadgeCheck,
-            },
-            {
-                time: "08:45",
-                title: "Check-in belum diterima",
-                description:
-                    "Pelanggan belum konfirmasi kedatangan. Siapkan tim front desk.",
-                icon: Clock,
-            },
-            {
-                time: "09:00",
-                title: "Estimasi sesi dimulai",
-                description:
-                    "Barber siap di kursi. Update status saat pelanggan tiba.",
-                icon: CalendarClock,
-                status: "upcoming",
-            },
-        ],
-        progress: 25,
-        actionLabel: "Konfirmasi kehadiran",
-    },
-    "inv-9041": {
-        id: "INV-9041",
-        externalId: "TT-3021",
-        status: "pending",
-        statusLabel: "Menunggu konfirmasi",
-        customer: {
-            name: "Dimas Saputra",
-            initials: "DS",
-            phone: "0812-8890-1122",
-            location: "TrimTime HQ, SCBD",
-            memberSince: "Agustus 2023",
-        },
-        schedule: {
-            date: "Selasa, 11 Feb 2025",
-            time: "09:00 WIB",
-            duration: "60 menit",
-            room: "Kursi 2 • Area Signature Fade",
-        },
-        service: {
-            name: "Signature Fade + Steam",
-            barber: "Rama Putra",
-            notes: "Tambahkan steam therapy 10 menit. Pelanggan suka finishing matte.",
-            channel: "Walk-in",
-        },
-        payment: {
-            items: [
-                { name: "Skin Fade Premium", price: 65000 },
-                { name: "Steam Therapy", price: 20000 },
-            ],
-            subtotal: 85000,
-            discount: 8500,
-            total: 76500,
-            promoCode: "TRIM10",
-            method: "QRIS",
-            tip: "Belum diatur",
-            status: "Lunas",
-            proofImage: "/payment-proof-sample.jpg",
-            proofUploadedAt: "11 Feb 2025, 08:45 WIB",
-        },
-        timeline: [
-            {
-                time: "08:30",
-                title: "Reminder dikirim",
-                description:
-                    "Sistem mengirim notifikasi WhatsApp otomatis ke pelanggan.",
-                icon: BadgeCheck,
-            },
-            {
-                time: "08:45",
-                title: "Check-in belum diterima",
-                description:
-                    "Pelanggan belum konfirmasi kedatangan. Siapkan tim front desk.",
-                icon: Clock,
-            },
-            {
-                time: "09:00",
-                title: "Estimasi sesi dimulai",
-                description:
-                    "Barber siap di kursi. Update status saat pelanggan tiba.",
-                icon: CalendarClock,
-                status: "upcoming",
-            },
-        ],
-        progress: 25,
-        actionLabel: "Konfirmasi kehadiran",
-    },
-};
 
 type BarberBookingDetailPageProps = {
     params: Promise<{ id: string }>;
@@ -449,20 +281,64 @@ export default async function BarberBookingDetailPage({
                                         </div>
                                     </div>
                                     <div className='flex flex-wrap items-center gap-2 text-xs text-muted-foreground'>
-                                        <Badge
-                                            variant='outline'
-                                            className='border-border/50'
-                                        >
-                                            <UserRound className='mr-1.5 h-3.5 w-3.5 text-primary' />
-                                            {booking.service.channel}
-                                        </Badge>
-                                        <Badge
-                                            variant='outline'
-                                            className='border-border/50'
-                                        >
-                                            <ShieldCheck className='mr-1.5 h-3.5 w-3.5 text-primary' />
-                                            Priority client
-                                        </Badge>
+                                        <div className='ml-auto flex flex-wrap items-center gap-2'>
+                                            {[
+                                                {
+                                                    icon: Phone,
+                                                    label: "Hubungi via telepon",
+                                                    href: telHref,
+                                                },
+                                                {
+                                                    icon: Send,
+                                                    label: "Kirim pesan instan",
+                                                    href: `${bookingBasePath}?action=send-message`,
+                                                },
+                                                {
+                                                    icon: MessageCircle,
+                                                    label: "Riwayat pesan",
+                                                    href: `${bookingBasePath}/messages`,
+                                                },
+                                                {
+                                                    icon: UserCheck,
+                                                    label: "Konfirmasi kehadiran",
+                                                    href: `${bookingBasePath}?action=confirm-attendance`,
+                                                },
+                                                {
+                                                    icon: ClipboardCheck,
+                                                    label: "Tandai check-in",
+                                                    href: `${bookingBasePath}?action=mark-check-in`,
+                                                },
+                                                {
+                                                    icon: SquarePen,
+                                                    label: "Tambah catatan internal",
+                                                    href: `${bookingBasePath}?action=add-note`,
+                                                },
+                                            ]
+                                                .filter((action) => action.href)
+                                                .map(
+                                                    ({
+                                                        icon: Icon,
+                                                        label,
+                                                        href,
+                                                    }) => (
+                                                        <Tooltip key={label}>
+                                                            <TooltipTrigger
+                                                                asChild
+                                                            >
+                                                                <Link
+                                                                    href={href!}
+                                                                    className='inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/40 bg-muted/30 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary'
+                                                                >
+                                                                    <Icon className='h-4 w-4' />
+                                                                </Link>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side='top'>
+                                                                {label}
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    )
+                                                )}
+                                        </div>
                                     </div>
                                 </CardHeader>
                                 <CardContent className='space-y-6 text-sm text-muted-foreground'>
@@ -503,109 +379,7 @@ export default async function BarberBookingDetailPage({
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div className='rounded-xl border border-border/40 bg-background/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'>
-                                        <div className='space-y-1.5'>
-                                            <p className='text-xs uppercase tracking-widest text-muted-foreground'>
-                                                Aksi cepat
-                                            </p>
-                                            <p className='text-xs text-muted-foreground'>
-                                                Kelola komunikasi dan update
-                                                status pelanggan langsung dari
-                                                dashboard barber.
-                                            </p>
-                                        </div>
-                                        <div className='mt-4 grid gap-2 sm:grid-cols-2'>
-                                            {telHref ? (
-                                                <Button
-                                                    size='sm'
-                                                    variant='outline'
-                                                    className='border-border/60 justify-start gap-2 text-xs'
-                                                    asChild
-                                                >
-                                                    <a
-                                                        href={telHref}
-                                                        className='inline-flex items-center gap-2'
-                                                    >
-                                                        <Phone className='h-3.5 w-3.5' />
-                                                        Hubungi via telepon
-                                                    </a>
-                                                </Button>
-                                            ) : null}
-                                            <Button
-                                                size='sm'
-                                                variant='outline'
-                                                className='border-border/60 justify-start gap-2 text-xs'
-                                                asChild
-                                            >
-                                                <Link
-                                                    href={`${bookingBasePath}?action=send-message`}
-                                                    className='inline-flex items-center gap-2'
-                                                >
-                                                    <Send className='h-3.5 w-3.5' />
-                                                    Kirim pesan instan
-                                                </Link>
-                                            </Button>
-                                            <Button
-                                                size='sm'
-                                                variant='outline'
-                                                className='border-border/60 justify-start gap-2 text-xs'
-                                                asChild
-                                            >
-                                                <Link
-                                                    href={`${bookingBasePath}/messages`}
-                                                    className='inline-flex items-center gap-2'
-                                                >
-                                                    <MessageCircle className='h-3.5 w-3.5' />
-                                                    Riwayat pesan
-                                                </Link>
-                                            </Button>
-                                            <Button
-                                                size='sm'
-                                                variant='outline'
-                                                className='border-border/60 justify-start gap-2 text-xs'
-                                                asChild
-                                            >
-                                                <Link
-                                                    href={`${bookingBasePath}?action=confirm-attendance`}
-                                                    className='inline-flex items-center gap-2'
-                                                >
-                                                    <UserCheck className='h-3.5 w-3.5' />
-                                                    Konfirmasi kehadiran
-                                                </Link>
-                                            </Button>
-                                            <Button
-                                                size='sm'
-                                                variant='outline'
-                                                className='border-border/60 justify-start gap-2 text-xs'
-                                                asChild
-                                            >
-                                                <Link
-                                                    href={`${bookingBasePath}?action=mark-check-in`}
-                                                    className='inline-flex items-center gap-2'
-                                                >
-                                                    <ClipboardCheck className='h-3.5 w-3.5' />
-                                                    Tandai check-in
-                                                </Link>
-                                            </Button>
-                                            <Button
-                                                size='sm'
-                                                variant='outline'
-                                                className='border-border/60 justify-start gap-2 text-xs'
-                                                asChild
-                                            >
-                                                <Link
-                                                    href={`${bookingBasePath}?action=add-note`}
-                                                    className='inline-flex items-center gap-2'
-                                                >
-                                                    <SquarePen className='h-3.5 w-3.5' />
-                                                    Tambah catatan internal
-                                                </Link>
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    <div className='grid gap-4 lg:grid-cols-2'>
+                                    <div className='grid gap-4 lg:grid-cols-1'>
                                         <div className='rounded-xl border border-border/40 bg-muted/20 p-4'>
                                             <p className='text-xs uppercase tracking-widest text-muted-foreground'>
                                                 Layanan
@@ -809,7 +583,7 @@ export default async function BarberBookingDetailPage({
                                         TrimTime.
                                     </CardDescription>
                                 </CardHeader>
-                                <CardContent className='grid gap-6 text-sm text-muted-foreground lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]'>
+                                <CardContent className='flex flex-col gap-6 text-sm text-muted-foreground'>
                                     {(() => {
                                         const statusContent =
                                             progressStatusContent[
@@ -872,34 +646,48 @@ export default async function BarberBookingDetailPage({
                                                 <div className='grid w-full gap-3'>
                                                     {statusContent.primaryLabel ? (
                                                         <Button
-                                                            variant={statusContent.primaryVariant ?? "default"}
+                                                            variant={
+                                                                statusContent.primaryVariant ??
+                                                                "default"
+                                                            }
                                                             className={cn(
                                                                 "w-full",
-                                                                statusContent.primaryVariant === "outline"
+                                                                statusContent.primaryVariant ===
+                                                                    "outline"
                                                                     ? "border-border/60"
                                                                     : undefined
                                                             )}
                                                         >
-                                                            {statusContent.primaryLabel}
+                                                            {
+                                                                statusContent.primaryLabel
+                                                            }
                                                         </Button>
                                                     ) : null}
                                                     {statusContent.secondaryLabel ? (
                                                         <Button
-                                                            variant={statusContent.secondaryVariant ?? "outline"}
+                                                            variant={
+                                                                statusContent.secondaryVariant ??
+                                                                "outline"
+                                                            }
                                                             className={cn(
                                                                 "w-full",
-                                                                statusContent.secondaryVariant === "outline"
+                                                                statusContent.secondaryVariant ===
+                                                                    "outline"
                                                                     ? "border-border/60"
                                                                     : undefined
                                                             )}
                                                         >
-                                                            {statusContent.secondaryLabel}
+                                                            {
+                                                                statusContent.secondaryLabel
+                                                            }
                                                         </Button>
                                                     ) : null}
                                                     {!statusContent.primaryLabel &&
                                                     !statusContent.secondaryLabel ? (
                                                         <Button className='w-full'>
-                                                            {booking.actionLabel}
+                                                            {
+                                                                booking.actionLabel
+                                                            }
                                                         </Button>
                                                     ) : null}
                                                 </div>

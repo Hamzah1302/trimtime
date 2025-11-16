@@ -78,7 +78,7 @@ const benefits = [
 export default function OwnerPremiumPage() {
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-3'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative flex flex-col gap-6'>
                     <div className='rounded-3xl border border-border/50 bg-card/90 p-6 text-center shadow-sm backdrop-blur-sm lg:p-10'>
@@ -111,7 +111,7 @@ export default function OwnerPremiumPage() {
                 </div>
             </section>
 
-            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-8'>
+            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-3'>
                 <div className='grid gap-5 lg:grid-cols-2'>
                     {tiers.map((tier) => (
                         <Card

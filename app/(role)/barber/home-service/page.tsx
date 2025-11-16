@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
+
 import {
     ArrowRight,
-    CheckCircle2,
     Clock,
     MapPin,
     MessageCircle,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,8 +24,15 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+    Dialog,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogContent,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 const activeTrip = {
     id: "HS-4473",
@@ -36,27 +45,6 @@ const activeTrip = {
     fee: "Rp 25.000",
     status: "on-the-way",
 } as const;
-
-const timelineSteps = [
-    {
-        label: "Berangkat",
-        description: "Barber meninggalkan barbershop pukul 10:05 WIB.",
-        time: "10:05 WIB",
-        status: "done",
-    },
-    {
-        label: "Dalam perjalanan",
-        description: "Sedang menuju Menara BCA melalui Sudirman.",
-        time: "Estimasi tiba 10:27 WIB",
-        status: "current",
-    },
-    {
-        label: "Sesi dimulai",
-        description: "Pastikan pelanggan siap menerima layanan.",
-        time: "Estimasi mulai 10:30 WIB",
-        status: "next",
-    },
-] as const;
 
 const queueRequests = [
     {
@@ -88,21 +76,52 @@ const queueRequests = [
     },
 ] as const;
 
-const timelineStyles = {
-    done: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30",
-    current: "bg-primary/10 text-primary border-primary/30",
-    next: "bg-muted/20 text-muted-foreground border-border/40",
-} satisfies Record<string, string>;
-
 const queueStatusLabel = {
     awaiting: "Menunggu konfirmasi",
     draft: "Butuh jadwal ulang",
 } satisfies Record<string, string>;
 
+const statusUpdateOptions = [
+    {
+        id: "on-the-way",
+        label: "Sedang OTW",
+        helper: "Barber masih dalam perjalanan",
+    },
+    {
+        id: "arrived",
+        label: "Tiba di lokasi",
+        helper: "Barber sudah sampai di alamat pelanggan",
+    },
+    {
+        id: "in-service",
+        label: "Layanan dimulai",
+        helper: "Sedang menyiapkan perlengkapan layanan",
+    },
+    {
+        id: "completed",
+        label: "Layanan selesai",
+        helper: "Siap kirim ringkasan & permintaan rating",
+    },
+] as const;
+
+type StatusUpdateId = (typeof statusUpdateOptions)[number]["id"];
+
 export default function BarberHomeServicePage() {
+    const [statusModalOpen, setStatusModalOpen] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState<StatusUpdateId>(
+        statusUpdateOptions[0].id
+    );
+    const [statusNote, setStatusNote] = useState<string>("");
+
+    const handleSubmitStatus = () => {
+        // Placeholder action – integrate with API later
+        setStatusModalOpen(false);
+        setStatusNote("");
+    };
+
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 pt-8 pb-4 lg:px-8 lg:pt-10'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative space-y-6'>
                     <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
@@ -170,53 +189,41 @@ export default function BarberHomeServicePage() {
                         </div>
                     </div>
 
-                    <div className='relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between'>
-                        <div className='space-y-3'>
+                    <Card className='border-border/50 bg-card/80 shadow-sm'>
+                        <CardContent className='space-y-4'>
                             <div className='inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary'>
                                 <Truck className='h-4 w-4' />
                                 Home Service Tracker
                             </div>
-                            <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
-                                Pantau perjalanan barber dalam sekali klik
-                            </h1>
-                            <p className='max-w-2xl text-sm text-muted-foreground lg:text-base'>
-                                Update status perjalanan (on the way → tiba →
-                                selesai), pantau estimasi jarak & ongkir, dan
-                                pastikan pelanggan menerima notifikasi otomatis.
-                            </p>
-                        </div>
-                        <div className='flex flex-col gap-3 rounded-2xl border border-border/40 bg-card/80 p-4 shadow-sm backdrop-blur-sm lg:w-[22rem]'>
-                            <div className='flex items-center justify-between text-xs text-muted-foreground'>
-                                <span className='font-semibold uppercase tracking-widest'>
-                                    Perjalanan aktif
-                                </span>
+                            <div className='space-y-3'>
+                                <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
+                                    Pantau perjalanan barber dalam satu tampilan
+                                </h1>
+                                <p className='max-w-2xl text-sm text-muted-foreground lg:text-base'>
+                                    Kelola status berangkat, tiba, hingga
+                                    selesai sambil memantau estimasi jarak,
+                                    ongkir, dan notifikasi agar pelanggan selalu
+                                    terinformasi tepat waktu.
+                                </p>
+                            </div>
+                            <div className='flex flex-wrap gap-2 text-xs text-muted-foreground'>
+                                <Badge className='bg-primary/10 text-primary'>
+                                    Auto-sync POS
+                                </Badge>
                                 <Badge
                                     variant='outline'
-                                    className='border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground'
+                                    className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
                                 >
-                                    Live GPS
+                                    Integrasi notifikasi SMS & WA
                                 </Badge>
                             </div>
-                            <div className='space-y-2 text-sm text-muted-foreground'>
-                                <p className='text-foreground text-lg font-bold'>
-                                    {activeTrip.customer}
-                                </p>
-                                <p>Tujuan: {activeTrip.destination}</p>
-                                <p>
-                                    Estimasi tiba dalam{" "}
-                                    <span className='font-semibold text-foreground'>
-                                        {activeTrip.eta}
-                                    </span>
-                                </p>
-                            </div>
-                            <Button>Kirim update ke pelanggan</Button>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </section>
 
-            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-8'>
-                <div className='grid gap-5 lg:grid-cols-[1.4fr_1fr]'>
+            <main className='space-y-5 px-5 pt-4 pb-6 lg:px-8 lg:pb-8'>
+                <div className='grid gap-5'>
                     <Card className='border-border/50 shadow-sm'>
                         <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>
                             <div>
@@ -225,7 +232,8 @@ export default function BarberHomeServicePage() {
                                 </CardTitle>
                                 <CardDescription>
                                     Pastikan barber tiba tepat waktu dan
-                                    pelanggan siap menyambut.
+                                    pelanggan senantiasa menerima pembaruan
+                                    terbaru.
                                 </CardDescription>
                             </div>
                             <div className='flex flex-wrap items-center gap-2 text-xs text-muted-foreground'>
@@ -243,6 +251,32 @@ export default function BarberHomeServicePage() {
                             </div>
                         </CardHeader>
                         <CardContent className='space-y-4'>
+                            <div className='flex flex-col gap-4 rounded-2xl border border-border/40 bg-card/80 p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between'>
+                                <div className='space-y-2 text-sm text-muted-foreground'>
+                                    <div className='flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground'>
+                                        <span>Perjalanan saat ini</span>
+                                        <Badge
+                                            variant='outline'
+                                            className='border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground'
+                                        >
+                                            Live GPS
+                                        </Badge>
+                                    </div>
+                                    <p className='text-foreground text-lg font-bold'>
+                                        {activeTrip.customer}
+                                    </p>
+                                    <p>Tujuan: {activeTrip.destination}</p>
+                                    <p>
+                                        Estimasi tiba dalam{" "}
+                                        <span className='font-semibold text-foreground'>
+                                            {activeTrip.eta}
+                                        </span>
+                                    </p>
+                                </div>
+                                <Button className='w-full lg:w-auto'>
+                                    Kirim pembaruan ke pelanggan
+                                </Button>
+                            </div>
                             <div className='relative overflow-hidden rounded-2xl border border-border/40'>
                                 <div className='absolute inset-0 bg-linear-to-tr from-primary/10 via-transparent to-accent/20' />
                                 <div className='relative flex h-64 flex-col justify-between bg-[url("/map-placeholder.svg")] bg-cover bg-center p-5 sm:h-72'>
@@ -283,7 +317,12 @@ export default function BarberHomeServicePage() {
                                                     <Route className='h-3.5 w-3.5' />
                                                     Buka di Maps
                                                 </Button>
-                                                <Button size='sm'>
+                                                <Button
+                                                    size='sm'
+                                                    onClick={() =>
+                                                        setStatusModalOpen(true)
+                                                    }
+                                                >
                                                     Update status
                                                 </Button>
                                             </div>
@@ -333,149 +372,17 @@ export default function BarberHomeServicePage() {
                             </div>
                         </CardContent>
                     </Card>
-
-                    <Card className='border-border/50 shadow-sm'>
-                        <CardHeader className='space-y-2'>
-                            <CardTitle className='text-xl font-semibold tracking-tight'>
-                                Detail perjalanan
-                            </CardTitle>
-                            <CardDescription>
-                                Pastikan pelanggan menerima kabar setiap status
-                                berubah.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className='space-y-4 text-sm text-muted-foreground'>
-                            <div className='rounded-xl border border-border/40 bg-muted/20 p-4'>
-                                <div className='flex items-center justify-between'>
-                                    <span className='text-xs font-semibold uppercase tracking-widest text-muted-foreground'>
-                                        Tujuan
-                                    </span>
-                                    <Badge
-                                        variant='outline'
-                                        className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
-                                    >
-                                        Prioritas tinggi
-                                    </Badge>
-                                </div>
-                                <p className='mt-2 text-base font-semibold text-foreground'>
-                                    {activeTrip.destination}
-                                </p>
-                                <p className='text-xs'>
-                                    Pastikan akses lobby dan parkir sudah
-                                    dikonfirmasi.
-                                </p>
-                            </div>
-                            <div className='rounded-xl border border-border/40 bg-muted/20 p-4'>
-                                <span className='text-xs font-semibold uppercase tracking-widest text-muted-foreground'>
-                                    Pengingat pelanggan
-                                </span>
-                                <ul className='mt-2 space-y-2 text-xs leading-relaxed'>
-                                    <li>
-                                        • Hubungi pelanggan 5 menit sebelum
-                                        tiba.
-                                    </li>
-                                    <li>
-                                        • Periksa perlengkapan sebelum memasuki
-                                        lokasi.
-                                    </li>
-                                    <li>
-                                        • Update status selesai begitu layanan
-                                        rampung.
-                                    </li>
-                                </ul>
-                            </div>
-                            <Button
-                                variant='outline'
-                                className='w-full border-border/60'
-                            >
-                                Lihat riwayat perjalanan
-                            </Button>
-                        </CardContent>
-                    </Card>
                 </div>
 
-                <div className='grid gap-5 lg:grid-cols-[1.3fr_1fr]'>
-                    <Card className='border-border/50 shadow-sm'>
-                        <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>
-                            <div>
-                                <CardTitle className='text-xl font-semibold tracking-tight'>
-                                    Timeline status
-                                </CardTitle>
-                                <CardDescription>
-                                    Ikuti urutan update agar pelanggan tahu
-                                    progres layanan.
-                                </CardDescription>
-                            </div>
-                            <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                                <span>Status progres:</span>
-                                <Badge className='bg-primary text-primary-foreground'>
-                                    66% selesai
-                                </Badge>
-                            </div>
-                        </CardHeader>
-                        <CardContent className='space-y-5'>
-                            <Progress value={66} />
-                            <div className='space-y-4'>
-                                {timelineSteps.map((step) => {
-                                    const Icon =
-                                        step.status === "done"
-                                            ? CheckCircle2
-                                            : step.status === "current"
-                                            ? Navigation
-                                            : Clock;
-                                    return (
-                                        <div
-                                            key={step.label}
-                                            className='flex gap-3 rounded-xl border border-border/40 bg-muted/20 p-4'
-                                        >
-                                            <span
-                                                className={`flex h-10 w-10 items-center justify-center rounded-full border ${
-                                                    timelineStyles[step.status]
-                                                }`}
-                                            >
-                                                <Icon className='h-4 w-4' />
-                                            </span>
-                                            <div className='space-y-1 text-sm text-muted-foreground'>
-                                                <div className='flex flex-wrap items-center gap-2'>
-                                                    <p className='text-base font-semibold text-foreground'>
-                                                        {step.label}
-                                                    </p>
-                                                    <Badge
-                                                        variant='outline'
-                                                        className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
-                                                    >
-                                                        {step.time}
-                                                    </Badge>
-                                                </div>
-                                                <p className='text-xs leading-relaxed'>
-                                                    {step.description}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                            <div className='rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 text-xs text-muted-foreground'>
-                                <p className='font-semibold text-primary'>
-                                    Tips koordinasi
-                                </p>
-                                <p className='mt-1 leading-relaxed'>
-                                    Aktifkan tombol “Tiba” sesaat setelah sampai
-                                    agar pelanggan menerima notifikasi dan
-                                    segera siap di lokasi layanan.
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-
+                <div className='grid gap-5'>
                     <Card className='border-border/50 shadow-sm'>
                         <CardHeader className='flex flex-col gap-2'>
                             <CardTitle className='text-xl font-semibold tracking-tight'>
                                 Antrean berikutnya
                             </CardTitle>
                             <CardDescription>
-                                Atur slot waktu dan ongkir sebelum barber
-                                berangkat.
+                                Susun slot waktu dan ongkir sebelum barber
+                                diberangkatkan.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className='space-y-3'>
@@ -562,6 +469,60 @@ export default function BarberHomeServicePage() {
                     </Card>
                 </div>
             </main>
+
+            <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Update status perjalanan</DialogTitle>
+                        <DialogDescription>
+                            Pilih status terbaru untuk dikirim ke pelanggan.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className='space-y-3'>
+                        {statusUpdateOptions.map((option) => (
+                            <button
+                                key={option.id}
+                                type='button'
+                                onClick={() => setSelectedStatus(option.id)}
+                                className={`w-full rounded-xl border px-4 py-3 text-left text-sm transition ${
+                                    selectedStatus === option.id
+                                        ? "border-primary bg-primary/5 text-foreground"
+                                        : "border-border/60 text-muted-foreground hover:border-border"
+                                }`}
+                            >
+                                <p className='font-semibold text-foreground'>
+                                    {option.label}
+                                </p>
+                                <p className='text-xs'>{option.helper}</p>
+                            </button>
+                        ))}
+                        <div className='space-y-2'>
+                            <p className='text-xs font-semibold uppercase tracking-widest text-muted-foreground'>
+                                Catatan tambahan
+                            </p>
+                            <Textarea
+                                placeholder='Contoh: Barber akan tiba 5 menit lagi.'
+                                value={statusNote}
+                                onChange={(event) =>
+                                    setStatusNote(event.target.value)
+                                }
+                                rows={3}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter className='mt-4'>
+                        <Button
+                            variant='outline'
+                            onClick={() => setStatusModalOpen(false)}
+                        >
+                            Batal
+                        </Button>
+                        <Button onClick={handleSubmitStatus}>
+                            Kirim pembaruan
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </PageShell>
     );
 }

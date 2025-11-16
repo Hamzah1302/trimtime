@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useMemo } from "react";
+import { useParams, useSearchParams } from "next/navigation";
 import {
     ArrowLeft,
     ArrowRight,
@@ -19,15 +20,6 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-
-// Dummy data
-const paymentData = {
-    barbershop: "Cut & Chill Studio",
-    service: "Skin Fade Premium + Beard Trim",
-    date: "15 Jan 2024, 10:00",
-    total: 105000,
-    deposit: 10000,
-};
 
 const paymentMethods = [
     {
@@ -54,11 +46,38 @@ const paymentMethods = [
 
 export default function PaymentPage() {
     const params = useParams<{ id: string }>();
+    const searchParams = useSearchParams();
     const bookingId = params?.id ?? "";
-    const bookingHref = bookingId ? `/user/booking/${bookingId}` : "/user/bookings";
-    const statusHref = bookingId
-        ? `/user/status/${bookingId}`
-        : "/user/status";
+    const bookingHref = bookingId
+        ? `/user/booking/${bookingId}`
+        : "/user/bookings";
+    const statusHref = bookingId ? `/user/status/${bookingId}` : "/user/status";
+
+    const paymentSummary = useMemo(() => {
+        const fallbackDate = searchParams.get("date") ?? "-";
+        const fallbackTime = searchParams.get("time") ?? "";
+        const dateLabel = fallbackTime
+            ? `${fallbackDate}, ${fallbackTime}`
+            : fallbackDate;
+        return {
+            barbershop:
+                searchParams.get("barbershopName") ?? "TrimTime Barbershop",
+            service: searchParams.get("serviceName") ?? "Paket grooming",
+            date: dateLabel,
+            servicePrice: Number(searchParams.get("servicePrice")) || 0,
+            shippingFee: Number(searchParams.get("shippingFee")) || 0,
+            total: Number(searchParams.get("total")) || 0,
+            address: searchParams.get("address"),
+            serviceType: searchParams.get("serviceType") ?? "in-shop",
+        };
+    }, [searchParams]);
+
+    const depositAmount = useMemo(() => {
+        if (paymentSummary.total > 0) {
+            return Math.max(25000, Math.round(paymentSummary.total * 0.25));
+        }
+        return 25000;
+    }, [paymentSummary.total]);
 
     return (
         <PageShell background='soft' contentClassName='gap-0'>
@@ -111,7 +130,7 @@ export default function PaymentPage() {
                                             Barbershop
                                         </p>
                                         <p className='mt-0.5 text-base font-bold text-foreground'>
-                                            {paymentData.barbershop}
+                                            {paymentSummary.barbershop}
                                         </p>
                                     </div>
                                 </div>
@@ -124,7 +143,7 @@ export default function PaymentPage() {
                                         Layanan
                                     </span>
                                     <span className='text-sm font-semibold text-foreground'>
-                                        {paymentData.service}
+                                        {paymentSummary.service}
                                     </span>
                                 </div>
                                 <div className='flex items-center justify-between'>
@@ -133,16 +152,48 @@ export default function PaymentPage() {
                                         Jadwal
                                     </span>
                                     <span className='text-sm font-semibold text-foreground'>
-                                        {paymentData.date}
+                                        {paymentSummary.date}
                                     </span>
                                 </div>
+                                <div className='flex items-center justify-between text-sm'>
+                                    <span className='text-muted-foreground'>
+                                        Biaya layanan
+                                    </span>
+                                    <span className='font-semibold text-foreground'>
+                                        Rp{" "}
+                                        {paymentSummary.servicePrice.toLocaleString()}
+                                    </span>
+                                </div>
+                                {paymentSummary.serviceType === "home" ? (
+                                    <div className='flex items-center justify-between text-sm'>
+                                        <span className='text-muted-foreground'>
+                                            Ongkir home service
+                                        </span>
+                                        <span className='font-semibold text-foreground'>
+                                            Rp{" "}
+                                            {paymentSummary.shippingFee.toLocaleString()}
+                                        </span>
+                                    </div>
+                                ) : null}
+                                {paymentSummary.serviceType === "home" &&
+                                paymentSummary.address ? (
+                                    <div className='flex items-center justify-between'>
+                                        <span className='inline-flex items-center gap-2 text-sm text-muted-foreground'>
+                                            <CalendarClock className='h-4 w-4 text-primary' />
+                                            Lokasi Home Service
+                                        </span>
+                                        <span className='text-sm font-semibold text-right text-foreground'>
+                                            {paymentSummary.address}
+                                        </span>
+                                    </div>
+                                ) : null}
                             </div>
                             <div className='flex items-center justify-between rounded-lg bg-primary/5 px-4 py-3 border-t-2 border-primary/20'>
                                 <span className='text-base font-bold text-foreground'>
                                     Total Pembayaran
                                 </span>
                                 <span className='text-xl font-bold text-primary'>
-                                    Rp {paymentData.total.toLocaleString()}
+                                    Rp {paymentSummary.total.toLocaleString()}
                                 </span>
                             </div>
                         </div>
@@ -215,18 +266,22 @@ export default function PaymentPage() {
                                     Jumlah DP
                                 </span>
                                 <span className='text-lg font-bold text-primary'>
-                                    Rp {paymentData.deposit.toLocaleString()}
+                                    Rp {depositAmount.toLocaleString()}
                                 </span>
                             </div>
                             <div className='flex items-start gap-3 rounded-lg border border-border/50 bg-muted/20 p-4'>
                                 <Checkbox id='deposit' className='mt-0.5' />
                                 <Label
                                     htmlFor='deposit'
-                                    className='flex-1 cursor-pointer text-sm leading-relaxed text-muted-foreground'
+                                    className='space-y-1 text-sm text-foreground'
                                 >
-                                    Bayar DP sekarang untuk memastikan slot
-                                    barber tetap aman dan mendapatkan prioritas
-                                    layanan.
+                                    <span className='font-semibold'>
+                                        Kirim bukti DP
+                                    </span>
+                                    <p className='text-xs text-muted-foreground'>
+                                        Deposit akan langsung dicatat oleh tim
+                                        TrimTime.
+                                    </p>
                                 </Label>
                             </div>
                         </div>

@@ -81,7 +81,7 @@ const quickActions = [
 export default function AdminDashboardPage() {
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-3'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative space-y-6'>
                     <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/85 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
@@ -185,7 +185,7 @@ export default function AdminDashboardPage() {
                 </div>
             </section>
 
-            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-8'>
+            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-3'>
                 <div className='grid gap-5 lg:grid-cols-[1.4fr_1fr]'>
                     <Card className='border-border/50 shadow-sm'>
                         <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>

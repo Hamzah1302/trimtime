@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 
-import { CalendarClock, Mail, Pencil, Plus, Send, ShieldCheck, UserRound } from "lucide-react";
+import {
+    CalendarClock,
+    Mail,
+    Pencil,
+    Plus,
+    Send,
+    ShieldCheck,
+    UserRound,
+} from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,7 +38,7 @@ import { mockBarbers } from "./_data/mock-barbers";
 export default function OwnerBarberPage() {
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-3'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative space-y-6'>
                     <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/85 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
@@ -39,9 +47,13 @@ export default function OwnerBarberPage() {
                                 <UserRound className='h-4 w-4' />
                                 Manajemen barber
                             </div>
-                            <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>Atur tim barber & shift</h1>
+                            <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
+                                Atur tim barber & shift
+                            </h1>
                             <p className='text-sm text-muted-foreground lg:text-base'>
-                                Tambah barber baru, aktif/nonaktifkan akun, kirim credential otomatis, dan pantau status shift real-time.
+                                Tambah barber baru, aktif/nonaktifkan akun,
+                                kirim credential otomatis, dan pantau status
+                                shift real-time.
                             </p>
                         </div>
                         <div className='flex flex-wrap gap-3'>
@@ -51,7 +63,10 @@ export default function OwnerBarberPage() {
                                     Tambah barber
                                 </Link>
                             </Button>
-                            <Button variant='outline' className='border-border/60 gap-2'>
+                            <Button
+                                variant='outline'
+                                className='border-border/60 gap-2'
+                            >
                                 <Send className='h-4 w-4' />
                                 Kirim ulang credential
                             </Button>
@@ -60,11 +75,16 @@ export default function OwnerBarberPage() {
                 </div>
             </section>
 
-            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-8'>
+            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-3'>
                 <Card className='border-border/50 shadow-sm'>
                     <CardHeader>
-                        <CardTitle className='text-xl font-semibold'>Daftar barber</CardTitle>
-                        <CardDescription>Kelola shift, lokasi bertugas, dan status aktif/nonaktif.</CardDescription>
+                        <CardTitle className='text-xl font-semibold'>
+                            Daftar barber
+                        </CardTitle>
+                        <CardDescription>
+                            Kelola shift, lokasi bertugas, dan status
+                            aktif/nonaktif.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className='overflow-x-auto'>
                         <Table>
@@ -75,7 +95,9 @@ export default function OwnerBarberPage() {
                                     <TableHead>Level</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Shift</TableHead>
-                                    <TableHead className='w-[110px] text-right'>Aksi</TableHead>
+                                    <TableHead className='w-[110px] text-right'>
+                                        Aksi
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -83,12 +105,23 @@ export default function OwnerBarberPage() {
                                     <TableRow key={barber.id}>
                                         <TableCell className='flex items-center gap-3'>
                                             <Avatar className='h-9 w-9'>
-                                                <AvatarImage src='/placeholder.jpg' alt={barber.name} />
-                                                <AvatarFallback>{barber.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                                <AvatarImage
+                                                    src='/placeholder.jpg'
+                                                    alt={barber.name}
+                                                />
+                                                <AvatarFallback>
+                                                    {barber.name
+                                                        .slice(0, 2)
+                                                        .toUpperCase()}
+                                                </AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className='font-semibold text-foreground'>{barber.name}</p>
-                                                <p className='text-xs text-muted-foreground'>ID {barber.id}</p>
+                                                <p className='font-semibold text-foreground'>
+                                                    {barber.name}
+                                                </p>
+                                                <p className='text-xs text-muted-foreground'>
+                                                    ID {barber.id}
+                                                </p>
                                             </div>
                                         </TableCell>
                                         <TableCell>{barber.branch}</TableCell>
@@ -101,10 +134,21 @@ export default function OwnerBarberPage() {
                                                 {barber.status}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className='text-sm font-medium text-foreground'>{barber.shift}</TableCell>
+                                        <TableCell className='text-sm font-medium text-foreground'>
+                                            {barber.shift}
+                                        </TableCell>
                                         <TableCell className='text-right'>
-                                            <Button variant='ghost' size='sm' className='gap-1 text-primary' asChild>
-                                                <Link href={`/owner/barber/${encodeURIComponent(barber.id)}/edit`}>
+                                            <Button
+                                                variant='ghost'
+                                                size='sm'
+                                                className='gap-1 text-primary'
+                                                asChild
+                                            >
+                                                <Link
+                                                    href={`/owner/barber/${encodeURIComponent(
+                                                        barber.id
+                                                    )}/edit`}
+                                                >
                                                     <Pencil className='h-3.5 w-3.5' />
                                                     Edit
                                                 </Link>
@@ -120,19 +164,38 @@ export default function OwnerBarberPage() {
                 <div className='grid gap-5 lg:grid-cols-[1.3fr_1fr]'>
                     <Card className='border-border/50 shadow-sm'>
                         <CardHeader>
-                            <CardTitle className='text-xl font-semibold'>Form barber baru</CardTitle>
-                            <CardDescription>Isi data barber, skill, dan cabang bertugas. Akun akan dikirim otomatis.</CardDescription>
+                            <CardTitle className='text-xl font-semibold'>
+                                Form barber baru
+                            </CardTitle>
+                            <CardDescription>
+                                Isi data barber, skill, dan cabang bertugas.
+                                Akun akan dikirim otomatis.
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className='space-y-4 text-sm text-muted-foreground'>
-                            <p className='text-foreground'>Registrasi barber baru hanya butuh beberapa langkah:</p>
+                            <p className='text-foreground'>
+                                Registrasi barber baru hanya butuh beberapa
+                                langkah:
+                            </p>
                             <ul className='list-disc space-y-1 pl-5'>
                                 <li>Isi data personal & kontak yang valid.</li>
-                                <li>Pilih skillset, level, dan shift default untuk auto scheduling.</li>
-                                <li>Sistem TrimTime mengirim credential & panduan onboarding otomatis.</li>
+                                <li>
+                                    Pilih skillset, level, dan shift default
+                                    untuk auto scheduling.
+                                </li>
+                                <li>
+                                    Sistem TrimTime mengirim credential &
+                                    panduan onboarding otomatis.
+                                </li>
                             </ul>
                             <div className='rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 text-sm text-primary'>
-                                <p className='font-semibold'>Butuh import massal?</p>
-                                <p className='text-primary/80'>Gunakan template CSV untuk aktifkan hingga 50 barber sekaligus.</p>
+                                <p className='font-semibold'>
+                                    Butuh import massal?
+                                </p>
+                                <p className='text-primary/80'>
+                                    Gunakan template CSV untuk aktifkan hingga
+                                    50 barber sekaligus.
+                                </p>
                             </div>
                         </CardContent>
                         <CardFooter>
@@ -146,18 +209,31 @@ export default function OwnerBarberPage() {
                     </Card>
                     <Card className='border-border/50 shadow-sm'>
                         <CardHeader>
-                            <CardTitle className='text-xl font-semibold'>Status shift hari ini</CardTitle>
-                            <CardDescription>Sinkron dengan auto schedule 70/30 TrimTime Premium.</CardDescription>
+                            <CardTitle className='text-xl font-semibold'>
+                                Status shift hari ini
+                            </CardTitle>
+                            <CardDescription>
+                                Sinkron dengan auto schedule 70/30 TrimTime
+                                Premium.
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className='space-y-4 text-sm text-muted-foreground'>
                             <div className='rounded-xl border border-border/40 bg-muted/15 p-4'>
-                                <p className='text-xs uppercase tracking-widest text-muted-foreground'>Shift pagi</p>
-                                <p className='text-lg font-bold text-foreground'>23 barber aktif</p>
+                                <p className='text-xs uppercase tracking-widest text-muted-foreground'>
+                                    Shift pagi
+                                </p>
+                                <p className='text-lg font-bold text-foreground'>
+                                    23 barber aktif
+                                </p>
                                 <p>SCBD, Menteng, Kelapa Gading</p>
                             </div>
                             <div className='rounded-xl border border-border/40 bg-muted/15 p-4'>
-                                <p className='text-xs uppercase tracking-widest text-muted-foreground'>Shift sore</p>
-                                <p className='text-lg font-bold text-foreground'>19 barber aktif</p>
+                                <p className='text-xs uppercase tracking-widest text-muted-foreground'>
+                                    Shift sore
+                                </p>
+                                <p className='text-lg font-bold text-foreground'>
+                                    19 barber aktif
+                                </p>
                                 <p>BSD, Bandung, Surabaya</p>
                             </div>
                             <div className='space-y-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4'>
@@ -166,9 +242,14 @@ export default function OwnerBarberPage() {
                                     Schedule otomatis
                                 </p>
                                 <p>
-                                    TrimTime Premium bisa membagi shift berdasarkan demand cabang, rating barber, dan komisi otomatis 70/30.
+                                    TrimTime Premium bisa membagi shift
+                                    berdasarkan demand cabang, rating barber,
+                                    dan komisi otomatis 70/30.
                                 </p>
-                                <Button variant='outline' className='w-full border-border/60 gap-2'>
+                                <Button
+                                    variant='outline'
+                                    className='w-full border-border/60 gap-2'
+                                >
                                     <ShieldCheck className='h-4 w-4' />
                                     Aktifkan auto-schedule
                                 </Button>

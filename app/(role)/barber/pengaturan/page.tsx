@@ -51,7 +51,7 @@ export default function BarberPengaturanPage() {
 
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 pt-8 pb-3 lg:px-8 lg:pt-10 lg:pb-2'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative space-y-6'>
                     <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
@@ -116,57 +116,91 @@ export default function BarberPengaturanPage() {
                                     <p>Online & Home Service</p>
                                 </div>
                             </div>
-                    </div>
-                </div>
-
-                <div className='relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between'>
-                        <div className='space-y-3'>
-                            <div className='inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary'>
-                                <Settings2 className='h-4 w-4' />
-                                Pengaturan Barber
-                            </div>
-                            <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
-                                Atur jadwal, mode layanan, dan skill barber
-                            </h1>
-                            <p className='max-w-2xl text-sm text-muted-foreground lg:text-base'>
-                                Sesuaikan jam kerja, aktifkan mode home service,
-                                dan kelola daftar keahlian agar profil barber
-                                selalu up-to-date di aplikasi TrimTime.
-                            </p>
-                        </div>
-                        <div className='flex flex-col gap-3 rounded-2xl border border-border/50 bg-card/80 p-4 shadow-sm backdrop-blur-sm lg:w-[22rem]'>
-                            <div className='flex items-center justify-between text-xs text-muted-foreground'>
-                                <span className='font-semibold uppercase tracking-widest'>
-                                    Status barber
-                                </span>
-                                <Badge
-                                    variant='outline'
-                                    className='border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground'
-                                >
-                                    Tersambung
-                                </Badge>
-                            </div>
-                            <div className='space-y-2 text-sm text-muted-foreground'>
-                                <p className='text-lg font-bold text-foreground'>
-                                    Rama Putra
-                                </p>
-                                <p>Ketersediaan: 09:00 - 21:00 WIB</p>
-                            </div>
-                            <Button>Simpan seluruh perubahan</Button>
                         </div>
                     </div>
+
+                    <Card className='border-border/50 bg-card/80 shadow-sm'>
+                        <CardContent className='grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center'>
+                            <div className='space-y-4'>
+                                <div className='inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary'>
+                                    <Settings2 className='h-4 w-4' />
+                                    Pengaturan Barber
+                                </div>
+                                <div className='space-y-3'>
+                                    <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
+                                        Atur jadwal, mode layanan, dan skill
+                                        barber
+                                    </h1>
+                                    <p className='max-w-2xl text-sm text-muted-foreground lg:text-base'>
+                                        Sesuaikan jam kerja, aktifkan mode home
+                                        service, dan kelola daftar keahlian agar
+                                        profil barber selalu up-to-date di
+                                        aplikasi TrimTime.
+                                    </p>
+                                </div>
+                                <div className='flex flex-wrap gap-2 text-xs text-muted-foreground'>
+                                    <Badge className='bg-primary/10 text-primary'>
+                                        Realtime sync
+                                    </Badge>
+                                    <Badge
+                                        variant='outline'
+                                        className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
+                                    >
+                                        Auto-notifikasi pelanggan
+                                    </Badge>
+                                </div>
+                            </div>
+                            <div className='space-y-3 rounded-2xl border border-border/50 bg-muted/15 p-4 text-sm text-muted-foreground'>
+                                <div className='flex items-center justify-between text-xs'>
+                                    <span className='font-semibold uppercase tracking-widest text-muted-foreground'>
+                                        Status barber
+                                    </span>
+                                    <Badge
+                                        variant='outline'
+                                        className='border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground'
+                                    >
+                                        Tersambung
+                                    </Badge>
+                                </div>
+                                <div>
+                                    <p className='text-lg font-bold text-foreground'>
+                                        Rama Putra
+                                    </p>
+                                    <p>Ketersediaan: 09:00 - 21:00 WIB</p>
+                                </div>
+                                <div className='flex flex-wrap items-center gap-2 text-xs'>
+                                    <Button
+                                        size='sm'
+                                        className='flex-1 min-w-[160px]'
+                                    >
+                                        Simpan seluruh perubahan
+                                    </Button>
+                                    <Button
+                                        size='sm'
+                                        variant='outline'
+                                        className='border-border/60 flex-1 min-w-[160px]'
+                                    >
+                                        Lihat riwayat update
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
-                <div className='flex flex-col gap-3 rounded-2xl border border-border/50 bg-card/80 p-4 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between'>
+                <div className='flex flex-col gap-3 rounded-2xl mt-4 border border-border/50 bg-card/80 p-4 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between'>
                     <div>
                         <p className='text-xs font-semibold uppercase tracking-widest text-muted-foreground'>
                             Home service status
                         </p>
                         <p className='text-base font-bold text-foreground'>
-                            {homeServiceOnline ? "Online • menerima permintaan" : "Offline • tidak menerima permintaan"}
+                            {homeServiceOnline
+                                ? "Online • menerima permintaan"
+                                : "Offline • tidak menerima permintaan"}
                         </p>
                         <p className='text-xs text-muted-foreground'>
-                            Toggle ini mengatur apakah pelanggan bisa memesan layanan home service dari aplikasi.
+                            Toggle ini mengatur apakah pelanggan bisa memesan
+                            layanan home service dari aplikasi.
                         </p>
                     </div>
                     <div className='flex items-center gap-3 rounded-xl border border-border/40 bg-muted/20 px-4 py-2'>
@@ -181,7 +215,7 @@ export default function BarberPengaturanPage() {
                     </div>
                 </div>
             </section>
-            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-8'>
+            <main className='space-y-6 px-5 pt-3 pb-6 lg:px-8 lg:pt-4 lg:pb-8'>
                 <div className='grid gap-5 lg:grid-cols-[1.4fr_1fr]'>
                     <Card className='border-border/50 shadow-sm'>
                         <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>

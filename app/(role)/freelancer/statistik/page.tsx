@@ -90,7 +90,7 @@ const ratingSources = [
         platform: "Aplikasi TrimTime",
         rating: 4.9,
         reviews: 118,
-        highlight: "Mayoritas pelanggan premium",
+        highlight: "Mayoritas pelanggan home service",
     },
     {
         platform: "Google Review",
@@ -102,7 +102,7 @@ const ratingSources = [
         platform: "Walk-in Feedback",
         rating: 4.7,
         reviews: 56,
-        highlight: "Suka pengalaman home service",
+        highlight: "Suka fleksibilitas freelancer",
     },
 ] as const;
 
@@ -131,7 +131,7 @@ const weeklyChartConfig = {
 export default function FreelancerStatistikPage() {
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-10'>
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 pt-8 pb-4 lg:px-8 lg:pt-10 lg:pb-6'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative space-y-6'>
                     <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
@@ -173,7 +173,7 @@ export default function FreelancerStatistikPage() {
                                 <TrendingUp className='h-4 w-4 text-primary' />
                                 <div className='leading-tight'>
                                     <p className='text-xs font-semibold text-foreground'>
-                                        Pendapatan minggu ini
+                                        Pendapatan
                                     </p>
                                     <p>Rp 8.120.000</p>
                                 </div>
@@ -199,48 +199,79 @@ export default function FreelancerStatistikPage() {
                         </div>
                     </div>
 
-                    <div className='relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between'>
-                        <div className='space-y-3'>
-                            <div className='inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary'>
-                                <TrendingUp className='h-4 w-4' />
-                                Insight Performa
+                    <Card className='border-border/50 bg-card/80 shadow-sm'>
+                        <CardContent className='grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center'>
+                            <div className='space-y-4'>
+                                <div className='inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary'>
+                                    <TrendingUp className='h-4 w-4' />
+                                    Insight Freelancer
+                                </div>
+                                <div className='space-y-3'>
+                                    <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
+                                        Statistik pendapatan & rating freelancer
+                                    </h1>
+                                    <p className='max-w-2xl text-sm text-muted-foreground lg:text-base'>
+                                        Analisis pendapatan harian, tren OTW vs
+                                        layanan aktif, serta kualitas layanan
+                                        berdasarkan rating pelanggan. Gunakan
+                                        data ini untuk menentukan promo home
+                                        service dan kapasitas armada.
+                                    </p>
+                                </div>
+                                <div className='flex flex-wrap gap-2 text-xs text-muted-foreground'>
+                                    <Badge className='bg-primary/10 text-primary'>
+                                        Realtime insight
+                                    </Badge>
+                                    <Badge
+                                        variant='outline'
+                                        className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
+                                    >
+                                        Auto-sync GPS
+                                    </Badge>
+                                </div>
                             </div>
-                            <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
-                                Statistik pendapatan & rating freelancer
-                            </h1>
-                            <p className='max-w-2xl text-sm text-muted-foreground lg:text-base'>
-                                Analisis pendapatan harian, tren mingguan, dan
-                                kualitas layanan berdasarkan rating pelanggan.
-                                Gunakan data ini untuk menentukan strategi promo
-                                dan kapasitas tim.
-                            </p>
-                        </div>
-                        <div className='flex flex-col gap-3 rounded-2xl border border-border/50 bg-card/80 p-4 shadow-sm backdrop-blur-sm lg:w-88'>
-                            <div className='flex items-center justify-between text-xs text-muted-foreground'>
-                                <span className='font-semibold uppercase tracking-widest'>
-                                    Target bulanan
-                                </span>
-                                <Badge
-                                    variant='outline'
-                                    className='border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground'
-                                >
-                                    Februari 2025
-                                </Badge>
+                            <div className='space-y-3 rounded-2xl border border-border/50 bg-muted/15 p-4 text-sm text-muted-foreground'>
+                                <div className='flex items-center justify-between text-xs'>
+                                    <span className='font-semibold uppercase tracking-widest text-muted-foreground'>
+                                        Target bulanan
+                                    </span>
+                                    <Badge
+                                        variant='outline'
+                                        className='border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground'
+                                    >
+                                        Februari 2025
+                                    </Badge>
+                                </div>
+                                <div>
+                                    <p className='text-lg font-bold text-foreground'>
+                                        Rp 18.500.000
+                                    </p>
+                                    <p>Tercapai 72% hingga hari ini.</p>
+                                </div>
+                                <Progress value={72} />
+                                <div className='flex flex-wrap items-center gap-2 text-xs'>
+                                    <Button
+                                        size='sm'
+                                        className='flex-1 min-w-[160px]'
+                                    >
+                                        Unduh laporan
+                                    </Button>
+                                    <Button
+                                        size='sm'
+                                        variant='outline'
+                                        className='border-border/60 flex-1 min-w-[160px]'
+                                    >
+                                        <ArrowRight className='h-3.5 w-3.5' />
+                                        Lihat detail
+                                    </Button>
+                                </div>
                             </div>
-                            <div className='space-y-2 text-sm text-muted-foreground'>
-                                <p className='text-lg font-bold text-foreground'>
-                                    Rp 29.500.000
-                                </p>
-                                <p>Tercapai 72% hingga hari ini.</p>
-                            </div>
-                            <Progress value={72} />
-                            <Button>Unduh laporan</Button>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </section>
 
-            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-8'>
+            <main className='space-y-6 px-5 pt-4 pb-6 lg:px-8 lg:pt-5 lg:pb-8'>
                 <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
                     {highlightMetrics.map(
                         ({ label, value, helper, icon: Icon }) => (

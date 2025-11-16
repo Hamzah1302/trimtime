@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, Filter, Heart, MapPin, Search, Sparkles } from "lucide-react";
+import {
+    Bell,
+    Filter,
+    Heart,
+    Home,
+    MapPin,
+    Search,
+    Sparkles,
+    Store,
+} from "lucide-react";
 
 import { PageShell } from "@/components/layout/page-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,7 +55,6 @@ export default function Homepage() {
 
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            {/* Mobile Header - Hidden on Desktop */}
             <header className='rounded-xl border border-border/50 bg-card/95 px-5 py-4 shadow-sm backdrop-blur-sm lg:hidden'>
                 <div className='flex items-center justify-between gap-4'>
                     <div className='flex items-center gap-3'>
@@ -139,7 +147,6 @@ export default function Homepage() {
                 </div>
             </header>
 
-            {/* Hero Section - Welcome Banner */}
             <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-12'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-5' />
                 <div className='relative space-y-6'>
@@ -161,7 +168,7 @@ export default function Homepage() {
                                 maksimal
                             </p>
                         </div>
-                        {/* Desktop: Notification & Favorite buttons */}
+
                         <div className='hidden lg:flex items-center gap-2'>
                             <Dialog>
                                 <DialogTrigger asChild>
@@ -344,6 +351,22 @@ export default function Homepage() {
                                                 }
                                             </span>
                                         </div>
+                                        <div className='flex flex-wrap gap-2 pt-2 text-xs font-semibold'>
+                                            {barbershopDatabase.list[0]
+                                                .supportsOnSite && (
+                                                <span className='inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-white shadow-sm backdrop-blur'>
+                                                    <Store className='h-3.5 w-3.5' />
+                                                    On-site ready
+                                                </span>
+                                            )}
+                                            {barbershopDatabase.list[0]
+                                                .supportsHomeService && (
+                                                <span className='inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-white shadow-sm backdrop-blur'>
+                                                    <Home className='h-3.5 w-3.5' />
+                                                    Home service
+                                                </span>
+                                            )}
+                                        </div>
                                         <Link
                                             href={`/user/barbershop/${barbershopDatabase.list[0].id}`}
                                         >
@@ -410,6 +433,20 @@ export default function Homepage() {
                                                 <span className='text-muted-foreground'>
                                                     {shop.status}
                                                 </span>
+                                            </div>
+                                            <div className='flex flex-wrap gap-1.5 text-[11px] font-medium'>
+                                                {shop.supportsOnSite && (
+                                                    <span className='inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700'>
+                                                        <Store className='h-3 w-3' />
+                                                        On-site
+                                                    </span>
+                                                )}
+                                                {shop.supportsHomeService && (
+                                                    <span className='inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-blue-700'>
+                                                        <Home className='h-3 w-3' />
+                                                        Home service
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
 

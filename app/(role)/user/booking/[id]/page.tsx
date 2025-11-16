@@ -28,26 +28,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-
-// Dummy data
-const bookingData = {
-    barbershop: "Cut & Chill Studio",
-    services: [
-        {
-            id: "in-shop",
-            name: "Cukur di studio",
-            price: 65000,
-            duration: "35 menit",
-        },
-        {
-            id: "home",
-            name: "Home service",
-            price: 95000,
-            duration: "55 menit",
-        },
-    ],
-    estimate: { price: 65000, duration: "35 menit" },
-};
+import { barbershopDatabase } from "@/data/barbershops";
+import type { BarbershopDetail } from "@/data/barbershops";
 
 const scheduleSlotTemplates: Array<
     Array<{ time: string; available: boolean; barbers: number[] }>
@@ -121,8 +103,43 @@ export default function BookingPage() {
     const router = useRouter();
     const params = useParams<{ id: string }>();
     const bookingId = params?.id ?? "";
-    const [serviceType, setServiceType] = useState<"in-shop" | "home">(
-        "in-shop"
+    const barbershopSummary = useMemo(
+        () => barbershopDatabase.list.find((entry) => entry.id === bookingId),
+        [bookingId]
+    );
+    const isFreelancer = barbershopSummary?.type === "freelancer";
+    const detailFromDatabase = barbershopDatabase.details[bookingId];
+
+    const fallbackServices = barbershopSummary?.services.map((serviceName) => ({
+        name: serviceName,
+        description: `Paket ${serviceName} oleh ${barbershopSummary.name}.`,
+        price: barbershopSummary.price,
+        duration: isFreelancer ? "45 menit" : "60 menit",
+        allowBarberChoice: true,
+    }));
+
+    const fallbackDetail: BarbershopDetail | undefined = barbershopSummary
+        ? {
+              id: barbershopSummary.id,
+              name: barbershopSummary.name,
+              address: barbershopSummary.address,
+              rating: barbershopSummary.rating,
+              reviewCount: barbershopSummary.ratingCount,
+              description: `Layanan fleksibel oleh ${barbershopSummary.name}.`,
+              status: barbershopSummary.status,
+              photos: barbershopSummary.heroImage
+                  ? [barbershopSummary.heroImage]
+                  : [],
+              barbers: [],
+              services: fallbackServices ?? [],
+              benefits: barbershopSummary.tags,
+              comments: [],
+          }
+        : undefined;
+
+    const barbershopDetail = detailFromDatabase ?? fallbackDetail;
+    const [serviceType, setServiceType] = useState<"in-shop" | "home">(() =>
+        isFreelancer ? "home" : "in-shop"
     );
     const [homeAddress, setHomeAddress] = useState("");
     const [homeNotes, setHomeNotes] = useState("");
@@ -139,6 +156,33 @@ export default function BookingPage() {
     );
 
     const slots = useMemo(() => selectedDay?.slots ?? [], [selectedDay]);
+    const serviceOptions = useMemo(() => {
+        const parsePrice = (priceLabel: string) =>
+            Number(priceLabel.replace(/[^0-9]/g, "")) || 0;
+
+        return (barbershopDetail?.services ?? []).map((service, index) => {
+            const priceValue = parsePrice(service.price ?? "0");
+
+            return {
+                id: `${service.name}-${index}`,
+                ...service,
+                priceValue,
+                priceLabel:
+                    service.price ?? `Rp ${priceValue.toLocaleString()}`,
+            };
+        });
+    }, [barbershopDetail?.services]);
+
+    const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+        null
+    );
+
+    const effectiveServiceId =
+        selectedServiceId ?? serviceOptions[0]?.id ?? null;
+
+    const selectedService =
+        serviceOptions.find((service) => service.id === effectiveServiceId) ??
+        serviceOptions[0];
     const allTimes = useMemo(
         () => [
             "09:00",
@@ -180,20 +224,28 @@ export default function BookingPage() {
         [availableBarberIds]
     );
 
-    const shippingFee = serviceType === "home" ? 10000 : 0;
-    const baseService =
-        bookingData.services.find((service) => service.id === serviceType) ??
-        bookingData.services[0];
-    const totalEstimate = baseService.price + shippingFee;
+    const effectiveServiceType = isFreelancer ? "home" : serviceType;
+    const shippingFee = effectiveServiceType === "home" ? 10000 : 0;
+    const selectedServicePriceValue = selectedService?.priceValue ?? 0;
+    const barbershopName =
+        barbershopSummary?.name ??
+        barbershopDetail?.name ??
+        "Barbershop TrimTime";
+    const totalEstimate = selectedServicePriceValue + shippingFee;
 
+    const requiresBarberSelection =
+        !isFreelancer && (selectedService?.allowBarberChoice ?? true);
     const canBook = Boolean(
         selectedDate &&
             selectedTime &&
-            selectedBarberId &&
-            (serviceType === "home" ? homeAddress.trim().length >= 8 : true)
+            (requiresBarberSelection ? selectedBarberId : true) &&
+            (effectiveServiceType === "home"
+                ? homeAddress.trim().length >= 8
+                : true)
     );
 
     const handleServiceChange = (value: string) => {
+        if (isFreelancer && value === "in-shop") return;
         setServiceType(value === "home" ? "home" : "in-shop");
     };
 
@@ -211,17 +263,24 @@ export default function BookingPage() {
     };
 
     const handleBooking = () => {
-        if (!canBook || !selectedDate || !selectedTime || !selectedBarberId)
-            return;
+        if (!canBook || !selectedDate || !selectedTime) return;
+        if (requiresBarberSelection && !selectedBarberId) return;
 
         const paramsObj = new URLSearchParams({
-            serviceType,
+            barbershopName,
+            serviceType: effectiveServiceType,
+            serviceName: selectedService?.name ?? "Paket custom",
+            servicePrice: selectedServicePriceValue.toString(),
             date: selectedDate,
             time: selectedTime,
-            barber: selectedBarberId.toString(),
+            barber: requiresBarberSelection
+                ? selectedBarberId!.toString()
+                : "auto",
+            shippingFee: shippingFee.toString(),
+            total: totalEstimate.toString(),
         });
 
-        if (serviceType === "home" && homeAddress) {
+        if (effectiveServiceType === "home" && homeAddress) {
             paramsObj.append("address", homeAddress);
         }
 
@@ -256,7 +315,7 @@ export default function BookingPage() {
                 <Card className='border border-border/50 bg-card text-card-foreground shadow-sm'>
                     <CardHeader className='space-y-1'>
                         <CardTitle className='text-lg font-semibold tracking-tight'>
-                            {bookingData.barbershop}
+                            {barbershopName}
                         </CardTitle>
                         <CardDescription className='text-sm text-muted-foreground'>
                             Pilih preferensi layanan dan jadwal terbaikmu.
@@ -266,39 +325,104 @@ export default function BookingPage() {
                         <section className='space-y-3'>
                             <Label className='flex items-center gap-2 text-xs font-semibold text-foreground'>
                                 <Scissors className='h-4 w-4 text-primary' />
-                                Jenis layanan
+                                Pilih paket layanan
+                            </Label>
+                            {serviceOptions.length ? (
+                                <RadioGroup
+                                    value={effectiveServiceId ?? ""}
+                                    onValueChange={setSelectedServiceId}
+                                    className='space-y-2'
+                                >
+                                    {serviceOptions.map((service) => (
+                                        <label
+                                            key={service.id}
+                                            className={cn(
+                                                "flex items-start gap-3 rounded-lg border p-4 transition-colors cursor-pointer",
+                                                selectedService?.id ===
+                                                    service.id
+                                                    ? "border-primary bg-primary/5 shadow-sm"
+                                                    : "border-border/50 hover:bg-muted/50"
+                                            )}
+                                        >
+                                            <RadioGroupItem
+                                                value={service.id}
+                                            />
+                                            <div className='flex flex-1 flex-col gap-2 text-sm'>
+                                                <div className='flex flex-wrap items-center justify-between gap-2'>
+                                                    <div>
+                                                        <p className='font-semibold tracking-tight text-card-foreground'>
+                                                            {service.name}
+                                                        </p>
+                                                        <p className='text-xs text-muted-foreground'>
+                                                            {
+                                                                service.description
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                    <div className='text-right'>
+                                                        <p className='text-base font-bold text-primary'>
+                                                            {service.priceLabel}
+                                                        </p>
+                                                        <p className='text-[11px] text-muted-foreground'>
+                                                            {service.duration}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                {service.allowBarberChoice ===
+                                                false ? (
+                                                    <span className='inline-flex items-center gap-1 rounded-full bg-muted/40 px-2 py-0.5 text-[11px] font-semibold text-muted-foreground'>
+                                                        Auto assign barber
+                                                    </span>
+                                                ) : null}
+                                            </div>
+                                        </label>
+                                    ))}
+                                </RadioGroup>
+                            ) : (
+                                <div className='rounded-lg border border-dashed border-border/50 bg-muted/20 p-4 text-xs text-muted-foreground'>
+                                    Layanan belum tersedia untuk barbershop ini.
+                                </div>
+                            )}
+                        </section>
+
+                        <section className='space-y-3'>
+                            <Label className='flex items-center gap-2 text-xs font-semibold text-foreground'>
+                                <MapPin className='h-4 w-4 text-primary' />
+                                Mode layanan
                             </Label>
                             <RadioGroup
-                                defaultValue='in-shop'
-                                value={serviceType}
+                                defaultValue={isFreelancer ? "home" : "in-shop"}
+                                value={effectiveServiceType}
                                 onValueChange={handleServiceChange}
                                 className='space-y-2'
                             >
+                                {!isFreelancer ? (
+                                    <label
+                                        className={cn(
+                                            "flex items-center gap-3 rounded-lg border p-4 transition-colors cursor-pointer",
+                                            serviceType === "in-shop"
+                                                ? "border-primary bg-primary/5 shadow-sm"
+                                                : "border-border/50 hover:bg-muted/50"
+                                        )}
+                                    >
+                                        <RadioGroupItem
+                                            value='in-shop'
+                                            id='in-shop'
+                                        />
+                                        <div className='flex flex-1 flex-col text-sm'>
+                                            <span className='font-semibold tracking-tight text-card-foreground'>
+                                                Cukur di studio
+                                            </span>
+                                            <span className='text-xs text-muted-foreground'>
+                                                Datang langsung ke barbershop
+                                            </span>
+                                        </div>
+                                    </label>
+                                ) : null}
                                 <label
                                     className={cn(
                                         "flex items-center gap-3 rounded-lg border p-4 transition-colors cursor-pointer",
-                                        serviceType === "in-shop"
-                                            ? "border-primary bg-primary/5 shadow-sm"
-                                            : "border-border/50 hover:bg-muted/50"
-                                    )}
-                                >
-                                    <RadioGroupItem
-                                        value='in-shop'
-                                        id='in-shop'
-                                    />
-                                    <div className='flex flex-1 flex-col text-sm'>
-                                        <span className='font-semibold tracking-tight text-card-foreground'>
-                                            Cukur di studio
-                                        </span>
-                                        <span className='text-xs text-muted-foreground'>
-                                            Datang langsung ke barbershop
-                                        </span>
-                                    </div>
-                                </label>
-                                <label
-                                    className={cn(
-                                        "flex items-center gap-3 rounded-lg border p-4 transition-colors cursor-pointer",
-                                        serviceType === "home"
+                                        effectiveServiceType === "home"
                                             ? "border-primary bg-primary/5 shadow-sm"
                                             : "border-border/50 hover:bg-muted/50"
                                     )}
@@ -317,7 +441,7 @@ export default function BookingPage() {
                             </RadioGroup>
                         </section>
 
-                        {serviceType === "home" && (
+                        {effectiveServiceType === "home" && (
                             <section className='space-y-3 rounded-lg border border-border/50 bg-muted/20 p-4'>
                                 <div className='space-y-2'>
                                     <Label className='flex items-center gap-2 text-xs font-semibold text-foreground'>
@@ -441,75 +565,88 @@ export default function BookingPage() {
                             )}
                         </section>
 
-                        <section className='space-y-3'>
-                            <Label className='flex items-center gap-2 text-xs font-semibold text-muted-foreground'>
-                                <Scissors className='h-4 w-4 text-primary' />
-                                Pilih barber
-                            </Label>
-                            {selectedTime ? (
-                                availableBarbers.length ? (
-                                    <div className='space-y-2'>
-                                        {availableBarbers.map((barber) => {
-                                            const isSelected =
-                                                selectedBarberId === barber.id;
-                                            return (
-                                                <button
-                                                    key={barber.id}
-                                                    type='button'
-                                                    onClick={() =>
-                                                        setSelectedBarberId(
-                                                            barber.id
-                                                        )
-                                                    }
-                                                    className={cn(
-                                                        "flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-colors",
-                                                        isSelected
-                                                            ? "border-primary bg-primary/5 shadow-sm"
-                                                            : "border-border/50 hover:bg-muted/50"
-                                                    )}
-                                                >
-                                                    <Avatar className='h-12 w-12 border-2 border-border/50 shadow-sm'>
-                                                        <AvatarImage
-                                                            src={barber.avatar}
-                                                            alt={barber.name}
-                                                        />
-                                                        <AvatarFallback className='bg-primary/10 text-primary font-semibold'>
-                                                            {barber.name
-                                                                .slice(0, 2)
-                                                                .toUpperCase()}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                    <div className='flex flex-1 flex-col'>
-                                                        <span className='text-sm font-semibold tracking-tight text-card-foreground'>
-                                                            {barber.name}
+                        {!isFreelancer && serviceOptions.length ? (
+                            <section className='space-y-3'>
+                                <Label className='flex items-center gap-2 text-xs font-semibold text-muted-foreground'>
+                                    <Scissors className='h-4 w-4 text-primary' />
+                                    Pilih barber
+                                </Label>
+                                {selectedTime ? (
+                                    availableBarbers.length ? (
+                                        <div className='space-y-2'>
+                                            {availableBarbers.map((barber) => {
+                                                const isSelected =
+                                                    selectedBarberId ===
+                                                    barber.id;
+                                                return (
+                                                    <button
+                                                        key={barber.id}
+                                                        type='button'
+                                                        onClick={() =>
+                                                            setSelectedBarberId(
+                                                                barber.id
+                                                            )
+                                                        }
+                                                        className={cn(
+                                                            "flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-colors",
+                                                            isSelected
+                                                                ? "border-primary bg-primary/5 shadow-sm"
+                                                                : "border-border/50 hover:bg-muted/50"
+                                                        )}
+                                                    >
+                                                        <Avatar className='h-12 w-12 border-2 border-border/50 shadow-sm'>
+                                                            <AvatarImage
+                                                                src={
+                                                                    barber.avatar
+                                                                }
+                                                                alt={
+                                                                    barber.name
+                                                                }
+                                                            />
+                                                            <AvatarFallback className='bg-primary/10 text-primary font-semibold'>
+                                                                {barber.name
+                                                                    .slice(0, 2)
+                                                                    .toUpperCase()}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                        <div className='flex flex-1 flex-col'>
+                                                            <span className='text-sm font-semibold tracking-tight text-card-foreground'>
+                                                                {barber.name}
+                                                            </span>
+                                                            <span className='text-xs font-medium text-muted-foreground'>
+                                                                Rating{" "}
+                                                                {barber.rating.toFixed(
+                                                                    1
+                                                                )}
+                                                            </span>
+                                                        </div>
+                                                        <span className='text-xs text-muted-foreground'>
+                                                            Pilih
                                                         </span>
-                                                        <span className='text-xs font-medium text-muted-foreground'>
-                                                            Rating{" "}
-                                                            {barber.rating.toFixed(
-                                                                1
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                    <span className='text-xs text-muted-foreground'>
-                                                        Pilih
-                                                    </span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <div className='rounded-2xl border border-dashed border-border p-4 text-xs text-muted-foreground'>
+                                            Slot {selectedTime} sudah penuh.
+                                            Silakan pilih waktu lain.
+                                        </div>
+                                    )
                                 ) : (
-                                    <div className='rounded-2xl border border-dashed border-border p-4 text-xs text-muted-foreground'>
-                                        Slot {selectedTime} sudah penuh. Silakan
-                                        pilih waktu lain.
+                                    <div className='rounded-lg border border-dashed border-border/50 bg-muted/20 p-4 text-xs text-muted-foreground'>
+                                        Pilih waktu terlebih dahulu untuk
+                                        melihat barber yang tersedia.
                                     </div>
-                                )
-                            ) : (
-                                <div className='rounded-lg border border-dashed border-border/50 bg-muted/20 p-4 text-xs text-muted-foreground'>
-                                    Pilih waktu terlebih dahulu untuk melihat
-                                    barber yang tersedia.
-                                </div>
-                            )}
-                        </section>
+                                )}
+                            </section>
+                        ) : null}
+                        {!requiresBarberSelection && !isFreelancer ? (
+                            <div className='rounded-lg border border-dashed border-border/50 bg-muted/20 p-4 text-xs text-muted-foreground'>
+                                Paket layanan ini akan otomatis dipasangkan
+                                dengan barber terbaik yang tersedia.
+                            </div>
+                        ) : null}
 
                         <section className='space-y-2'>
                             <Label className='flex items-center gap-2 text-xs font-semibold text-muted-foreground'>
@@ -533,7 +670,8 @@ export default function BookingPage() {
                                     Subtotal layanan
                                 </span>
                                 <span className='font-semibold text-card-foreground'>
-                                    Rp {baseService.price.toLocaleString()}
+                                    Rp{" "}
+                                    {selectedServicePriceValue.toLocaleString()}
                                 </span>
                             </div>
                             <div className='flex items-center justify-between text-xs font-medium text-muted-foreground'>
@@ -541,9 +679,9 @@ export default function BookingPage() {
                                     <Clock className='h-3.5 w-3.5' />
                                     Estimasi durasi
                                 </span>
-                                <span>{baseService.duration}</span>
+                                <span>{selectedService?.duration ?? "-"}</span>
                             </div>
-                            {serviceType === "home" && (
+                            {effectiveServiceType === "home" && (
                                 <div className='flex items-center justify-between text-xs font-medium text-muted-foreground'>
                                     <span className='inline-flex items-center gap-2'>
                                         <MapPin className='h-3.5 w-3.5' />
