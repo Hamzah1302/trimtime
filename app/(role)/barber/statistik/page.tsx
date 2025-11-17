@@ -2,22 +2,13 @@
 
 import {
     ArrowRight,
-    BarChart3,
-    LineChart as LineChartIcon,
-    Route,
+    Calendar,
+    CheckCircle2,
     Star,
     TrendingUp,
     Wallet,
 } from "lucide-react";
-import {
-    Bar,
-    CartesianGrid,
-    ComposedChart,
-    Line,
-    LineChart,
-    XAxis,
-    YAxis,
-} from "recharts";
+import { Bar, CartesianGrid, BarChart, XAxis, YAxis } from "recharts";
 
 import { PageShell } from "@/components/layout/page-shell";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +22,6 @@ import {
 } from "@/components/ui/card";
 import {
     ChartContainer,
-    ChartLegend,
     ChartTooltip,
     ChartTooltipContent,
     type ChartConfig,
@@ -39,101 +29,80 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const highlightMetrics = [
-    {
-        label: "Pendapatan minggu ini",
-        value: "Rp 8.120.000",
-        helper: "+12% dibanding minggu lalu",
-        icon: Wallet,
-    },
-    {
-        label: "Rata-rata rating",
-        value: "4.9 / 5",
-        helper: "118 ulasan baru",
-        icon: Star,
-    },
-    {
-        label: "Konversi home service",
-        value: "86%",
-        helper: "19 dari 22 permintaan",
-        icon: Route,
-    },
-] as const;
-
 const dailyRevenue: Array<{
     day: string;
     pendapatan: number;
+}> = [
+    { day: "Sen", pendapatan: 820_000 },
+    { day: "Sel", pendapatan: 1_250_000 },
+    { day: "Rab", pendapatan: 980_000 },
+    { day: "Kam", pendapatan: 1_360_000 },
+    { day: "Jum", pendapatan: 1_120_000 },
+    { day: "Sab", pendapatan: 1_520_000 },
+    { day: "Min", pendapatan: 640_000 },
+];
+
+const dailyBookings: Array<{
+    day: string;
     booking: number;
 }> = [
-    { day: "Sen", pendapatan: 820_000, booking: 9 },
-    { day: "Sel", pendapatan: 1_250_000, booking: 11 },
-    { day: "Rab", pendapatan: 980_000, booking: 8 },
-    { day: "Kam", pendapatan: 1_360_000, booking: 12 },
-    { day: "Jum", pendapatan: 1_120_000, booking: 10 },
-    { day: "Sab", pendapatan: 1_520_000, booking: 13 },
-    { day: "Min", pendapatan: 640_000, booking: 6 },
+    { day: "Sen", booking: 9 },
+    { day: "Sel", booking: 11 },
+    { day: "Rab", booking: 8 },
+    { day: "Kam", booking: 12 },
+    { day: "Jum", booking: 10 },
+    { day: "Sab", booking: 13 },
+    { day: "Min", booking: 6 },
 ];
 
-const weeklyRevenue: Array<{
-    minggu: string;
-    pendapatan: number;
-    homeService: number;
-}> = [
-    { minggu: "13-19 Jan", pendapatan: 6_820_000, homeService: 14 },
-    { minggu: "20-26 Jan", pendapatan: 7_250_000, homeService: 16 },
-    { minggu: "27 Jan-2 Feb", pendapatan: 7_580_000, homeService: 18 },
-    { minggu: "3-9 Feb", pendapatan: 8_120_000, homeService: 19 },
-];
-
-const ratingSources = [
-    {
-        platform: "Aplikasi TrimTime",
-        rating: 4.9,
-        reviews: 118,
-        highlight: "Mayoritas pelanggan premium",
-    },
-    {
-        platform: "Google Review",
-        rating: 4.8,
-        reviews: 74,
-        highlight: "Respons cepat & ramah",
-    },
-    {
-        platform: "Walk-in Feedback",
-        rating: 4.7,
-        reviews: 56,
-        highlight: "Suka suasana barbershop",
-    },
-] as const;
-
-const dailyChartConfig = {
+const revenueChartConfig = {
     pendapatan: {
-        label: "Pendapatan (Rp)",
+        label: "Pendapatan",
         color: "hsl(var(--primary))",
     },
+} satisfies ChartConfig;
+
+const bookingChartConfig = {
     booking: {
-        label: "Jumlah booking",
-        color: "hsl(var(--accent))",
+        label: "Jumlah pelanggan",
+        color: "hsl(var(--chart-2))",
     },
 } satisfies ChartConfig;
 
-const weeklyChartConfig = {
-    pendapatan: {
-        label: "Pendapatan (Rp)",
-        color: "hsl(var(--primary))",
-    },
-    homeService: {
-        label: "Home service",
-        color: "hsl(var(--secondary))",
-    },
-} satisfies ChartConfig;
+// Helper to format currency
+const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+    }).format(value);
+};
+
+// Calculate total revenue for the week
+const totalWeeklyRevenue = dailyRevenue.reduce(
+    (sum, day) => sum + day.pendapatan,
+    0
+);
+
+// Calculate total bookings for the week
+const totalWeeklyBookings = dailyBookings.reduce(
+    (sum, day) => sum + day.booking,
+    0
+);
+
+// Find best day
+const bestRevenueDay = dailyRevenue.reduce((prev, current) =>
+    prev.pendapatan > current.pendapatan ? prev : current
+);
 
 export default function BarberStatistikPage() {
     return (
         <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 pt-8 pb-4 lg:px-8 lg:pt-10 lg:pb-6'>
+            {/* Header Section */}
+            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 pt-8 pb-4 lg:px-8 lg:pt-10'>
                 <div className='absolute inset-0 bg-grid-pattern opacity-10' />
                 <div className='relative space-y-6'>
+                    {/* Barber Profile Card */}
                     <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
                         <div className='flex items-center gap-4'>
                             <Avatar className='h-12 w-12 border-2 border-primary/40 shadow-lg'>
@@ -153,181 +122,134 @@ export default function BarberStatistikPage() {
                                     >
                                         Barber
                                     </Badge>
-                                    <Badge
-                                        variant='outline'
-                                        className='border-border/60 bg-muted/20 text-[9px] font-semibold uppercase tracking-widest text-muted-foreground'
-                                    >
-                                        Barber-Owner
-                                    </Badge>
                                 </div>
-                                <p className='text-sm text-muted-foreground'>
-                                    Barber
-                                </p>
                                 <h2 className='text-xl font-bold tracking-tight text-foreground'>
                                     Rama Putra
                                 </h2>
-                            </div>
-                        </div>
-                        <div className='grid gap-3 text-xs text-muted-foreground sm:grid-cols-2 lg:w-auto lg:grid-cols-3'>
-                            <div className='flex items-center gap-2 rounded-lg border border-border/40 bg-muted/15 px-3 py-2'>
-                                <TrendingUp className='h-4 w-4 text-primary' />
-                                <div className='leading-tight'>
-                                    <p className='text-xs font-semibold text-foreground'>
-                                        Pendapatan minggu ini
-                                    </p>
-                                    <p>Rp 8.120.000</p>
-                                </div>
-                            </div>
-                            <div className='flex items-center gap-2 rounded-lg border border-border/40 bg-muted/15 px-3 py-2'>
-                                <Star className='h-4 w-4 text-primary' />
-                                <div className='leading-tight'>
-                                    <p className='text-xs font-semibold text-foreground'>
-                                        Rating rata-rata
-                                    </p>
-                                    <p>4.9 / 5</p>
-                                </div>
-                            </div>
-                            <div className='flex items-center gap-2 rounded-lg border border-border/40 bg-muted/15 px-3 py-2'>
-                                <Route className='h-4 w-4 text-primary' />
-                                <div className='leading-tight'>
-                                    <p className='text-xs font-semibold text-foreground'>
-                                        Home service
-                                    </p>
-                                    <p>19 perjalanan</p>
-                                </div>
+                                <p className='text-sm text-muted-foreground'>
+                                    TrimTime HQ, SCBD
+                                </p>
                             </div>
                         </div>
                     </div>
 
+                    {/* Page Title Card */}
                     <Card className='border-border/50 bg-card/80 shadow-sm'>
-                        <CardContent className='grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center'>
-                            <div className='space-y-4'>
-                                <div className='inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary'>
-                                    <TrendingUp className='h-4 w-4' />
-                                    Insight Performa
-                                </div>
-                                <div className='space-y-3'>
-                                    <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
-                                        Statistik pendapatan & rating barber
-                                    </h1>
-                                    <p className='max-w-2xl text-sm text-muted-foreground lg:text-base'>
-                                        Analisis pendapatan harian, tren
-                                        mingguan, dan kualitas layanan
-                                        berdasarkan rating pelanggan. Gunakan
-                                        data ini untuk menentukan strategi promo
-                                        dan kapasitas tim.
-                                    </p>
-                                </div>
-                                <div className='flex flex-wrap gap-2 text-xs text-muted-foreground'>
-                                    <Badge className='bg-primary/10 text-primary'>
-                                        Realtime insight
-                                    </Badge>
-                                    <Badge
-                                        variant='outline'
-                                        className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
-                                    >
-                                        Auto-sync POS
-                                    </Badge>
-                                </div>
+                        <CardContent className='space-y-4'>
+                            <div className='inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary'>
+                                <TrendingUp className='h-4 w-4' />
+                                Performa Saya
                             </div>
-                            <div className='space-y-3 rounded-2xl border border-border/50 bg-muted/15 p-4 text-sm text-muted-foreground'>
-                                <div className='flex items-center justify-between text-xs'>
-                                    <span className='font-semibold uppercase tracking-widest text-muted-foreground'>
-                                        Target bulanan
-                                    </span>
-                                    <Badge
-                                        variant='outline'
-                                        className='border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground'
-                                    >
-                                        Februari 2025
-                                    </Badge>
-                                </div>
-                                <div>
-                                    <p className='text-lg font-bold text-foreground'>
-                                        Rp 29.500.000
-                                    </p>
-                                    <p>Tercapai 72% hingga hari ini.</p>
-                                </div>
-                                <Progress value={72} />
-                                <div className='flex flex-wrap items-center gap-2 text-xs'>
-                                    <Button
-                                        size='sm'
-                                        className='flex-1 min-w-[160px]'
-                                    >
-                                        Unduh laporan
-                                    </Button>
-                                    <Button
-                                        size='sm'
-                                        variant='outline'
-                                        className='border-border/60 flex-1 min-w-[160px]'
-                                    >
-                                        <ArrowRight className='h-3.5 w-3.5' />
-                                        Lihat detail
-                                    </Button>
-                                </div>
+                            <div className='space-y-3'>
+                                <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
+                                    Ringkasan pendapatan & performa
+                                </h1>
+                                <p className='max-w-2xl text-sm text-muted-foreground lg:text-base'>
+                                    Lihat berapa yang sudah Anda hasilkan minggu
+                                    ini, kapan hari paling sibuk, dan apa yang
+                                    perlu dilakukan selanjutnya.
+                                </p>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
             </section>
 
+            {/* Main Content */}
             <main className='space-y-6 px-5 pt-4 pb-6 lg:px-8 lg:pt-5 lg:pb-8'>
-                <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
-                    {highlightMetrics.map(
-                        ({ label, value, helper, icon: Icon }) => (
-                            <Card
-                                key={label}
-                                className='border-border/50 bg-card/90 shadow-sm transition-all hover:shadow-md'
+                {/* PRIMARY INFO - Big Numbers */}
+                <div className='grid gap-4 lg:grid-cols-3'>
+                    {/* Main Revenue Card */}
+                    <Card className='border-primary/40 bg-primary/5 shadow-sm lg:col-span-2'>
+                        <CardHeader className='space-y-1'>
+                            <CardDescription className='text-xs uppercase tracking-widest text-muted-foreground'>
+                                Pendapatan 7 hari terakhir
+                            </CardDescription>
+                            <CardTitle className='text-4xl font-bold text-foreground lg:text-5xl'>
+                                {formatCurrency(totalWeeklyRevenue)}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className='space-y-3'>
+                            <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                                <Badge className='bg-green-100 text-green-700'>
+                                    <TrendingUp className='mr-1 h-3 w-3' />
+                                    +12% dari minggu lalu
+                                </Badge>
+                                <span className='text-xs'>
+                                    Anda melayani {totalWeeklyBookings} pelanggan
+                                </span>
+                            </div>
+                            <div className='rounded-lg border border-border/40 bg-card p-3 text-xs'>
+                                <p className='font-semibold text-foreground'>
+                                    💡 Hari terbaik: {bestRevenueDay.day}
+                                </p>
+                                <p className='mt-1 text-muted-foreground'>
+                                    Anda mendapat{" "}
+                                    {formatCurrency(bestRevenueDay.pendapatan)}{" "}
+                                    pada hari {bestRevenueDay.day}. Pertahankan!
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Rating Card */}
+                    <Card className='border-border/50 shadow-sm'>
+                        <CardHeader className='space-y-1'>
+                            <CardDescription className='text-xs uppercase tracking-widest text-muted-foreground'>
+                                Rating pelanggan
+                            </CardDescription>
+                            <CardTitle className='flex items-baseline gap-2'>
+                                <span className='text-4xl font-bold text-foreground'>
+                                    4.8
+                                </span>
+                                <span className='text-xl text-muted-foreground'>
+                                    / 5
+                                </span>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className='space-y-3'>
+                            <Badge className='bg-green-100 text-green-700'>
+                                <Star className='mr-1 h-3 w-3 fill-current' />
+                                Sangat Baik
+                            </Badge>
+                            <p className='text-xs text-muted-foreground'>
+                                Dari 248 ulasan pelanggan di semua platform
+                                (TrimTime, Google, Walk-in).
+                            </p>
+                            <Button
+                                variant='outline'
+                                size='sm'
+                                className='w-full border-border/60'
                             >
-                                <CardHeader className='gap-3'>
-                                    <div className='flex items-center justify-between'>
-                                        <span className='flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary'>
-                                            <Icon className='h-5 w-5' />
-                                        </span>
-                                        <Badge
-                                            variant='outline'
-                                            className='border-border/50 text-[10px] uppercase tracking-widest text-muted-foreground'
-                                        >
-                                            {label}
-                                        </Badge>
-                                    </div>
-                                    <CardTitle className='text-2xl font-bold text-foreground'>
-                                        {value}
-                                    </CardTitle>
-                                    <CardDescription className='text-xs text-muted-foreground'>
-                                        {helper}
-                                    </CardDescription>
-                                </CardHeader>
-                            </Card>
-                        )
-                    )}
+                                Lihat semua review
+                            </Button>
+                        </CardContent>
+                    </Card>
                 </div>
 
-                <div className='grid gap-5 xl:grid-cols-2'>
+                {/* SECONDARY INFO - Charts */}
+                <div className='grid gap-5 lg:grid-cols-2'>
+                    {/* Revenue Chart */}
                     <Card className='border-border/50 shadow-sm'>
-                        <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>
-                            <div>
-                                <CardTitle className='text-xl font-semibold tracking-tight'>
-                                    Pendapatan harian
-                                </CardTitle>
-                                <CardDescription>
-                                    Bandingkan pendapatan dan jumlah booking
-                                    selama 7 hari terakhir.
-                                </CardDescription>
+                        <CardHeader>
+                            <div className='flex items-center justify-between'>
+                                <div>
+                                    <CardTitle className='text-lg font-semibold tracking-tight'>
+                                        Pendapatan per hari
+                                    </CardTitle>
+                                    <CardDescription className='text-xs'>
+                                        7 hari terakhir
+                                    </CardDescription>
+                                </div>
+                                <Wallet className='h-5 w-5 text-primary' />
                             </div>
-                            <Badge
-                                variant='outline'
-                                className='border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground'
-                            >
-                                7 hari terakhir
-                            </Badge>
                         </CardHeader>
-                        <CardContent className='space-y-4'>
+                        <CardContent>
                             <ChartContainer
-                                config={dailyChartConfig}
-                                className='h-[260px]'
+                                config={revenueChartConfig}
+                                className='h-[200px]'
                             >
-                                <ComposedChart data={dailyRevenue}>
+                                <BarChart data={dailyRevenue}>
                                     <CartesianGrid
                                         strokeDasharray='4 8'
                                         stroke='var(--border)'
@@ -346,84 +268,63 @@ export default function BarberStatistikPage() {
                                         tickMargin={8}
                                         stroke='var(--muted-foreground)'
                                         tickFormatter={(value) =>
-                                            `${value / 1000}k`
+                                            `${(value / 1000).toFixed(0)}k`
                                         }
                                     />
                                     <ChartTooltip
                                         cursor={{ fill: "transparent" }}
-                                        content={<ChartTooltipContent />}
+                                        content={
+                                            <ChartTooltipContent
+                                                formatter={(value) =>
+                                                    formatCurrency(
+                                                        value as number
+                                                    )
+                                                }
+                                            />
+                                        }
                                     />
                                     <Bar
                                         dataKey='pendapatan'
-                                        barSize={28}
-                                        radius={[10, 10, 0, 0]}
                                         fill='var(--color-pendapatan)'
+                                        radius={[8, 8, 0, 0]}
+                                        barSize={32}
                                     />
-                                    <Line
-                                        type='monotone'
-                                        dataKey='booking'
-                                        stroke='var(--color-booking)'
-                                        strokeWidth={2.5}
-                                        dot={{ r: 3.5 }}
-                                        activeDot={{ r: 5 }}
-                                    />
-                                </ComposedChart>
+                                </BarChart>
                             </ChartContainer>
-                            <div className='flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground'>
-                                <div className='flex items-center gap-2'>
-                                    <span className='inline-flex h-2 w-2 rounded-full bg-(--color-pendapatan)' />
-                                    Pendapatan (Rp)
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                    <span className='inline-flex h-2 w-2 rounded-full bg-(--color-booking)' />
-                                    Jumlah booking
-                                </div>
-                                <Button
-                                    variant='outline'
-                                    size='sm'
-                                    className='border-border/60'
-                                >
-                                    <BarChart3 className='h-3.5 w-3.5' />
-                                    Detail transaksi
-                                </Button>
-                            </div>
                         </CardContent>
                     </Card>
 
+                    {/* Booking Chart */}
                     <Card className='border-border/50 shadow-sm'>
-                        <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>
-                            <div>
-                                <CardTitle className='text-xl font-semibold tracking-tight'>
-                                    Tren mingguan
-                                </CardTitle>
-                                <CardDescription>
-                                    Lihat performa pendapatan dan jumlah
-                                    perjalanan home service.
-                                </CardDescription>
+                        <CardHeader>
+                            <div className='flex items-center justify-between'>
+                                <div>
+                                    <CardTitle className='text-lg font-semibold tracking-tight'>
+                                        Jumlah pelanggan per hari
+                                    </CardTitle>
+                                    <CardDescription className='text-xs'>
+                                        7 hari terakhir
+                                    </CardDescription>
+                                </div>
+                                <Calendar className='h-5 w-5 text-primary' />
                             </div>
-                            <Badge
-                                variant='outline'
-                                className='border-border/60 text-[10px] uppercase tracking-widest text-muted-foreground'
-                            >
-                                4 minggu terakhir
-                            </Badge>
                         </CardHeader>
-                        <CardContent className='space-y-4'>
+                        <CardContent>
                             <ChartContainer
-                                config={weeklyChartConfig}
-                                className='h-[260px]'
+                                config={bookingChartConfig}
+                                className='h-[200px]'
                             >
-                                <LineChart data={weeklyRevenue}>
+                                <BarChart data={dailyBookings}>
                                     <CartesianGrid
                                         strokeDasharray='4 8'
                                         stroke='var(--border)'
                                         vertical={false}
                                     />
                                     <XAxis
-                                        dataKey='minggu'
+                                        dataKey='day'
                                         tickLine={false}
                                         axisLine={false}
-                                        tickMargin={10}
+                                        tickMargin={8}
                                         stroke='var(--muted-foreground)'
                                     />
                                     <YAxis
@@ -431,162 +332,119 @@ export default function BarberStatistikPage() {
                                         axisLine={false}
                                         tickMargin={8}
                                         stroke='var(--muted-foreground)'
-                                        tickFormatter={(value) =>
-                                            `${value / 1000}k`
-                                        }
                                     />
                                     <ChartTooltip
-                                        cursor={{ stroke: "var(--border)" }}
+                                        cursor={{ fill: "transparent" }}
                                         content={
-                                            <ChartTooltipContent indicator='line' />
+                                            <ChartTooltipContent
+                                                formatter={(value) =>
+                                                    `${value} pelanggan`
+                                                }
+                                            />
                                         }
                                     />
-                                    <Line
-                                        type='monotone'
-                                        dataKey='pendapatan'
-                                        stroke='var(--color-pendapatan)'
-                                        strokeWidth={2.5}
-                                        dot={{ r: 3.5 }}
-                                        activeDot={{ r: 5 }}
+                                    <Bar
+                                        dataKey='booking'
+                                        fill='var(--color-booking)'
+                                        radius={[8, 8, 0, 0]}
+                                        barSize={32}
                                     />
-                                    <Line
-                                        type='monotone'
-                                        dataKey='homeService'
-                                        stroke='var(--color-homeService)'
-                                        strokeWidth={2.5}
-                                        strokeDasharray='6 3'
-                                        dot={{ r: 3.5 }}
-                                        activeDot={{ r: 5 }}
-                                    />
-                                    <ChartLegend className='pt-4 text-xs text-muted-foreground' />
-                                </LineChart>
+                                </BarChart>
                             </ChartContainer>
-                            <div className='rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 text-xs text-muted-foreground'>
-                                <p className='font-semibold text-primary'>
-                                    Insight mingguan
-                                </p>
-                                <p className='mt-1 leading-relaxed'>
-                                    Permintaan home service meningkat 15%
-                                    setelah promo “TrimTime Anywhere” berjalan.
-                                    Pertimbangkan untuk menambah slot barber
-                                    mobile di akhir pekan.
-                                </p>
-                            </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                <div className='grid gap-5 lg:grid-cols-[1.2fr_1fr]'>
-                    <Card className='border-border/50 shadow-sm'>
-                        <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>
-                            <div>
-                                <CardTitle className='text-xl font-semibold tracking-tight'>
-                                    Sumber rating pelanggan
-                                </CardTitle>
-                                <CardDescription>
-                                    Pantau kualitas layanan dari berbagai kanal
-                                    feedback.
-                                </CardDescription>
+                {/* TERTIARY INFO - What's Next */}
+                <Card className='border-primary/40 bg-gradient-to-br from-primary/5 to-accent/5 shadow-sm'>
+                    <CardHeader>
+                        <div className='inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary'>
+                            <CheckCircle2 className='h-4 w-4' />
+                            Yang perlu Anda lakukan
+                        </div>
+                        <CardTitle className='text-xl font-semibold tracking-tight'>
+                            Langkah selanjutnya
+                        </CardTitle>
+                        <CardDescription>
+                            Selesaikan task ini untuk meningkatkan performa
+                            Anda.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className='space-y-3'>
+                        {/* Action 1 */}
+                        <div className='flex items-start gap-3 rounded-xl border border-border/40 bg-card p-4'>
+                            <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10'>
+                                <Star className='h-4 w-4 text-primary' />
                             </div>
-                            <Button
-                                variant='outline'
-                                size='sm'
-                                className='border-border/60'
-                            >
-                                <Star className='h-3.5 w-3.5' />
-                                Lihat review
-                            </Button>
-                        </CardHeader>
-                        <CardContent className='space-y-4'>
-                            {ratingSources.map((source) => (
-                                <div
-                                    key={source.platform}
-                                    className='rounded-xl border border-border/40 bg-muted/20 p-4'
-                                >
-                                    <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
-                                        <div>
-                                            <p className='text-sm font-semibold text-foreground'>
-                                                {source.platform}
-                                            </p>
-                                            <p className='text-xs text-muted-foreground'>
-                                                {source.highlight}
-                                            </p>
-                                        </div>
-                                        <Badge className='bg-primary/15 text-sm font-semibold text-primary'>
-                                            {source.rating.toFixed(1)} / 5
-                                        </Badge>
-                                    </div>
-                                    <div className='mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground'>
-                                        <span>{source.reviews} ulasan</span>
-                                        <span className='inline-flex items-center gap-1 rounded-full bg-background px-2 py-1'>
-                                            <LineChartIcon className='h-3.5 w-3.5 text-primary' />
-                                            Konsistensi bagus
-                                        </span>
-                                        <Button
-                                            variant='outline'
-                                            size='sm'
-                                            className='border-border/60'
-                                        >
-                                            Respon cepat
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-
-                    <Card className='border-border/50 shadow-sm'>
-                        <CardHeader className='space-y-3'>
-                            <CardTitle className='text-xl font-semibold tracking-tight'>
-                                Target yang disarankan
-                            </CardTitle>
-                            <CardDescription>
-                                Fokuskan promo dan optimalisasi jadwal
-                                berdasarkan data terbaru.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className='space-y-4 text-xs text-muted-foreground'>
-                            <div className='rounded-xl border border-border/40 bg-muted/20 p-4'>
-                                <p className='font-semibold text-primary'>
-                                    Naikkan slot home service 10%
+                            <div className='flex-1 space-y-2'>
+                                <p className='text-sm font-semibold text-foreground'>
+                                    Balas 3 review yang menunggu
                                 </p>
-                                <p className='mt-1 leading-relaxed'>
-                                    Permintaan meningkat di area Sudirman &
-                                    Kuningan. Atur barber cadangan pada jam
-                                    sibuk sore.
+                                <p className='text-xs text-muted-foreground'>
+                                    Pelanggan menunggu tanggapan Anda. Balasan
+                                    cepat meningkatkan rating hingga 15%.
                                 </p>
-                            </div>
-                            <div className='rounded-xl border border-border/40 bg-muted/20 p-4'>
-                                <p className='font-semibold text-primary'>
-                                    Kirim kampanye rating otomatis
-                                </p>
-                                <p className='mt-1 leading-relaxed'>
-                                    40% pelanggan belum memberi review. Gunakan
-                                    reminder via WhatsApp setelah layanan
-                                    selesai.
-                                </p>
-                            </div>
-                            <div className='rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4'>
-                                <p className='font-semibold text-primary'>
-                                    Eksport data mentah
-                                </p>
-                                <p className='mt-1 leading-relaxed'>
-                                    Simpan laporan lengkap untuk rapat mingguan
-                                    atau kolaborasi dengan tim marketing
-                                    TrimTime.
-                                </p>
-                                <Button
-                                    variant='outline'
-                                    size='sm'
-                                    className='mt-3 border-border/60'
-                                >
+                                <Button size='sm' className='w-full sm:w-auto'>
                                     <ArrowRight className='h-3.5 w-3.5' />
-                                    Buka pusat laporan
+                                    Balas sekarang
                                 </Button>
                             </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                        </div>
+
+                        {/* Action 2 */}
+                        <div className='flex items-start gap-3 rounded-xl border border-border/40 bg-card p-4'>
+                            <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10'>
+                                <Calendar className='h-4 w-4 text-primary' />
+                            </div>
+                            <div className='flex-1 space-y-2'>
+                                <p className='text-sm font-semibold text-foreground'>
+                                    Konfirmasi 2 booking besok
+                                </p>
+                                <p className='text-xs text-muted-foreground'>
+                                    Anda punya 2 jadwal home service besok (11
+                                    Feb) yang perlu dikonfirmasi.
+                                </p>
+                                <Button
+                                    size='sm'
+                                    variant='outline'
+                                    className='w-full border-border/60 sm:w-auto'
+                                >
+                                    <ArrowRight className='h-3.5 w-3.5' />
+                                    Lihat jadwal
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Action 3 */}
+                        <div className='flex items-start gap-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4'>
+                            <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10'>
+                                <TrendingUp className='h-4 w-4 text-primary' />
+                            </div>
+                            <div className='flex-1 space-y-2'>
+                                <p className='text-sm font-semibold text-primary'>
+                                    Target bulanan: 72% tercapai
+                                </p>
+                                <div className='space-y-2'>
+                                    <Progress value={72} className='h-2' />
+                                    <p className='text-xs text-muted-foreground'>
+                                        Anda sudah dapat Rp 29,5 juta dari target
+                                        Rp 41 juta bulan ini. Pertahankan!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Download Report */}
+                        <div className='pt-2'>
+                            <Button
+                                variant='outline'
+                                className='w-full border-border/60'
+                            >
+                                Unduh laporan lengkap (PDF)
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
             </main>
         </PageShell>
     );

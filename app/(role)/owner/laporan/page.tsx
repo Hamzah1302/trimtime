@@ -1,18 +1,10 @@
 "use client";
 
+import { ArrowRight, CheckCircle2, Download, TrendingDown } from "lucide-react";
 import {
-    ArrowDownRight,
-    ArrowUpRight,
-    Download,
-    FileSpreadsheet,
-    Filter,
-    LineChart,
-    Percent,
-    Wallet,
-} from "lucide-react";
-import {
-    Line,
-    LineChart as RechartLineChart,
+    Bar,
+    BarChart,
+    CartesianGrid,
     ResponsiveContainer,
     Tooltip,
     XAxis,
@@ -29,7 +21,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
     Table,
     TableBody,
@@ -39,364 +30,525 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-const revenueData: Array<{
-    day: string;
-    booking: number;
-    revenue: number;
-}> = [
-    { day: "Sen", booking: 112, revenue: 26_000_000 },
-    { day: "Sel", booking: 134, revenue: 29_500_000 },
-    { day: "Rab", booking: 140, revenue: 30_200_000 },
-    { day: "Kam", booking: 138, revenue: 28_700_000 },
-    { day: "Jum", booking: 156, revenue: 33_100_000 },
-    { day: "Sab", booking: 170, revenue: 37_400_000 },
-    { day: "Min", booking: 122, revenue: 24_800_000 },
+const dailyRevenue = [
+    { day: "Sen", amount: 26_000_000 },
+    { day: "Sel", amount: 29_500_000 },
+    { day: "Rab", amount: 30_200_000 },
+    { day: "Kam", amount: 28_700_000 },
+    { day: "Jum", amount: 33_100_000 },
+    { day: "Sab", amount: 37_400_000 },
+    { day: "Min", amount: 24_800_000 },
 ];
 
-const reportTable = [
+const dailyBooking = [
+    { day: "Sen", count: 112 },
+    { day: "Sel", count: 134 },
+    { day: "Rab", count: 140 },
+    { day: "Kam", count: 138 },
+    { day: "Jum", count: 156 },
+    { day: "Sab", count: 170 },
+    { day: "Min", count: 122 },
+];
+
+// All 7 branches
+const allBranches = [
     {
         name: "TrimTime SCBD",
         booking: 412,
-        revenue: "Rp 98.500.000",
-        commission: "Rp 29.550.000",
-        payout: "Rp 68.950.000",
+        grossRevenue: 98_500_000,
+        platformFee: 9_850_000, // 10%
+        netToOwner: 88_650_000, // 90%
     },
     {
         name: "TrimTime Menteng",
         booking: 364,
-        revenue: "Rp 84.200.000",
-        commission: "Rp 24.600.000",
-        payout: "Rp 59.600.000",
+        grossRevenue: 84_200_000,
+        platformFee: 8_420_000,
+        netToOwner: 75_780_000,
+    },
+    {
+        name: "TrimTime Kelapa Gading",
+        booking: 318,
+        grossRevenue: 72_400_000,
+        platformFee: 7_240_000,
+        netToOwner: 65_160_000,
+    },
+    {
+        name: "TrimTime Pondok Indah",
+        booking: 295,
+        grossRevenue: 68_100_000,
+        platformFee: 6_810_000,
+        netToOwner: 61_290_000,
     },
     {
         name: "TrimTime BSD",
         booking: 280,
-        revenue: "Rp 62.400.000",
-        commission: "Rp 18.720.000",
-        payout: "Rp 43.680.000",
+        grossRevenue: 62_400_000,
+        platformFee: 6_240_000,
+        netToOwner: 56_160_000,
     },
-] as const;
+    {
+        name: "TrimTime Bandung",
+        booking: 252,
+        grossRevenue: 58_600_000,
+        platformFee: 5_860_000,
+        netToOwner: 52_740_000,
+    },
+    {
+        name: "TrimTime Surabaya",
+        booking: 241,
+        grossRevenue: 54_800_000,
+        platformFee: 5_480_000,
+        netToOwner: 49_320_000,
+    },
+];
+
+const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+    }).format(value);
+};
+
+const totalGrossRevenue = allBranches.reduce(
+    (sum, b) => sum + b.grossRevenue,
+    0
+);
+const totalPlatformFee = allBranches.reduce((sum, b) => sum + b.platformFee, 0);
+const totalNetToOwner = allBranches.reduce((sum, b) => sum + b.netToOwner, 0);
+const totalBooking = allBranches.reduce((sum, b) => sum + b.booking, 0);
 
 export default function OwnerLaporanPage() {
     return (
-        <PageShell background='soft' contentClassName='gap-0'>
-            <section className='relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5 px-5 py-8 lg:px-8 lg:py-3'>
-                <div className='absolute inset-0 bg-grid-pattern opacity-10' />
-                <div className='relative space-y-6'>
-                    <div className='flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/85 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between'>
-                        <div className='space-y-2'>
-                            <div className='inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary'>
-                                <LineChart className='h-4 w-4' />
-                                Laporan & Keuangan
-                            </div>
-                            <h1 className='text-3xl font-bold tracking-tight lg:text-4xl'>
-                                Rekap booking & komisi otomatis
-                            </h1>
-                            <p className='text-sm text-muted-foreground lg:text-base'>
-                                Pantau booking per cabang/barber, komisi 70/30
-                                otomatis, dan export laporan PDF/Excel untuk tim
-                                finance.
+        <PageShell background='soft' contentClassName='gap-6'>
+            {/* Header */}
+            <Card className='border-border/50'>
+                <CardContent className='p-6'>
+                    <div className='space-y-2'>
+                        <h1 className='text-2xl font-bold'>
+                            Laporan keuangan minggu ini
+                        </h1>
+                        <p className='text-sm text-muted-foreground'>
+                            3 - 9 Februari 2025 • Semua cabang
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* MAIN ANSWER: How much do I get? */}
+            <Card className='border-green-300 bg-green-50'>
+                <CardHeader>
+                    <div className='flex items-center gap-2'>
+                        <CheckCircle2 className='h-5 w-5 text-green-600' />
+                        <CardTitle className='text-green-900'>
+                            Pendapatan Anda minggu ini
+                        </CardTitle>
+                    </div>
+                    <CardDescription className='text-green-700'>
+                        Setelah dipotong platform fee 10%
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                    <div>
+                        <p className='text-4xl font-bold text-green-900'>
+                            {formatCurrency(totalNetToOwner)}
+                        </p>
+                        <p className='text-sm text-green-700'>
+                            Dari {totalBooking} booking di 7 cabang
+                        </p>
+                    </div>
+
+                    <div className='grid gap-3 sm:grid-cols-2'>
+                        <div className='rounded-lg border border-green-300 bg-white p-3'>
+                            <p className='text-xs text-muted-foreground'>
+                                Sudah transfer ke rekening
+                            </p>
+                            <p className='text-lg font-bold text-green-900'>
+                                {formatCurrency(totalNetToOwner * 0.88)}
+                            </p>
+                            <p className='text-xs text-muted-foreground'>
+                                Rek BCA ***1234 • 5 Feb 2025
                             </p>
                         </div>
-                        <div className='flex flex-wrap gap-3'>
-                            <Button className='gap-2'>
-                                <Download className='h-4 w-4' />
-                                Export PDF
-                            </Button>
-                            <Button
-                                variant='outline'
-                                className='border-border/60 gap-2'
-                            >
-                                <FileSpreadsheet className='h-4 w-4' />
-                                Export Excel
-                            </Button>
+                        <div className='rounded-lg border border-yellow-300 bg-yellow-50 p-3'>
+                            <p className='text-xs text-muted-foreground'>
+                                Pending transfer
+                            </p>
+                            <p className='text-lg font-bold text-yellow-900'>
+                                {formatCurrency(totalNetToOwner * 0.12)}
+                            </p>
+                            <p className='text-xs text-muted-foreground'>
+                                Akan masuk Jumat, 14 Feb 2025
+                            </p>
                         </div>
                     </div>
-                </div>
-            </section>
 
-            <main className='space-y-6 px-5 py-6 lg:px-8 lg:py-3'>
-                <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-                    {[
-                        {
-                            label: "Total booking minggu ini",
-                            value: "1.216",
-                            diff: "+12%",
-                            positive: true,
-                        },
-                        {
-                            label: "Pendapatan kotor",
-                            value: "Rp 292 jt",
-                            diff: "+8%",
-                            positive: true,
-                        },
-                        {
-                            label: "Komisi TrimTime 30%",
-                            value: "Rp 87 jt",
-                            diff: "+10%",
-                            positive: true,
-                        },
-                        {
-                            label: "Pembayaran ke owner",
-                            value: "Rp 205 jt",
-                            diff: "-2%",
-                            positive: false,
-                        },
-                    ].map((item) => (
-                        <Card
-                            key={item.label}
-                            className='border-border/50 shadow-sm'
-                        >
-                            <CardHeader className='space-y-1'>
-                                <CardDescription className='text-xs uppercase tracking-widest'>
-                                    {item.label}
-                                </CardDescription>
-                                <CardTitle className='text-2xl font-bold'>
-                                    {item.value}
-                                </CardTitle>
-                                <p
-                                    className={`flex items-center gap-1 text-xs font-semibold ${
-                                        item.positive
-                                            ? "text-emerald-600"
-                                            : "text-amber-600"
-                                    }`}
-                                >
-                                    {item.positive ? (
-                                        <ArrowUpRight className='h-3.5 w-3.5' />
-                                    ) : (
-                                        <ArrowDownRight className='h-3.5 w-3.5' />
-                                    )}
-                                    {item.diff} dibanding minggu lalu
+                    <Button className='w-full' asChild>
+                        <a href='#'>
+                            <Download className='h-4 w-4' />
+                            Unduh laporan lengkap (PDF)
+                        </a>
+                    </Button>
+                </CardContent>
+            </Card>
+
+            {/* Revenue sharing explanation */}
+            <Card className='border-border/50'>
+                <CardHeader>
+                    <CardTitle>Cara pembagian hasil</CardTitle>
+                    <CardDescription>
+                        Sistem revenue sharing TrimTime
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                    <div className='space-y-3 text-sm'>
+                        <div className='rounded-lg border border-border/40 bg-muted/20 p-4'>
+                            <p className='text-xs uppercase tracking-wider text-muted-foreground'>
+                                1. Pendapatan kotor dari pelanggan
+                            </p>
+                            <p className='text-2xl font-bold'>
+                                {formatCurrency(totalGrossRevenue)}
+                            </p>
+                            <p className='text-xs text-muted-foreground'>
+                                Total dari {totalBooking} booking
+                            </p>
+                        </div>
+
+                        <div className='flex items-center justify-center'>
+                            <div className='text-2xl text-muted-foreground'>
+                                ↓
+                            </div>
+                        </div>
+
+                        <div className='grid gap-3 sm:grid-cols-2'>
+                            <div className='rounded-lg border border-border/40 bg-red-50 p-4'>
+                                <p className='text-xs uppercase tracking-wider text-muted-foreground'>
+                                    2. Platform fee (10%)
                                 </p>
-                            </CardHeader>
-                        </Card>
-                    ))}
-                </div>
+                                <p className='text-xl font-bold text-red-900'>
+                                    -{formatCurrency(totalPlatformFee)}
+                                </p>
+                                <p className='text-xs text-muted-foreground'>
+                                    Biaya sistem TrimTime
+                                </p>
+                            </div>
 
-                <Card className='border-border/50 shadow-sm'>
-                    <CardHeader className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between'>
-                        <div>
-                            <CardTitle className='text-xl font-semibold'>
-                                Tren booking & pendapatan
-                            </CardTitle>
-                            <CardDescription>
-                                Data mingguan semua cabang.
-                            </CardDescription>
+                            <div className='rounded-lg border border-green-300 bg-green-100 p-4'>
+                                <p className='text-xs uppercase tracking-wider text-muted-foreground'>
+                                    3. Pendapatan Anda (90%)
+                                </p>
+                                <p className='text-xl font-bold text-green-900'>
+                                    {formatCurrency(totalNetToOwner)}
+                                </p>
+                                <p className='text-xs text-green-700'>
+                                    ✅ Ini yang Anda terima
+                                </p>
+                            </div>
                         </div>
-                        <div className='flex flex-wrap gap-2 text-sm'>
-                            <Button
-                                variant='outline'
-                                className='border-border/60 gap-2'
-                            >
-                                <Filter className='h-4 w-4' />
-                                Filter cabang
-                            </Button>
-                            <Input
-                                type='month'
-                                defaultValue='2025-02'
-                                className='w-auto border-border/60'
-                            />
-                        </div>
+                    </div>
+
+                    <div className='rounded-lg border border-dashed border-primary/40 bg-primary/5 p-4 text-xs'>
+                        <p className='font-semibold text-primary'>
+                            Contoh perhitungan per booking:
+                        </p>
+                        <p className='mt-2 text-muted-foreground'>
+                            Pelanggan bayar: <strong>Rp 100.000</strong>
+                            <br />
+                            • Platform fee 10%: -Rp 10.000
+                            <br />
+                            • <strong>Pendapatan Anda 90%: Rp 90.000</strong>
+                            <br />
+                            <br />
+                            Dari Rp 90.000 ini, Anda yang atur untuk bayar
+                            barber, operasional, dan profit Anda sendiri.
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Charts */}
+            <div className='grid gap-5 lg:grid-cols-2'>
+                <Card className='border-border/50'>
+                    <CardHeader>
+                        <CardTitle>Pendapatan per hari</CardTitle>
+                        <CardDescription>
+                            Revenue kotor 7 hari terakhir
+                        </CardDescription>
                     </CardHeader>
-                    <CardContent className='h-[320px]'>
+                    <CardContent className='h-[240px]'>
                         <ResponsiveContainer width='100%' height='100%'>
-                            <RechartLineChart
-                                data={revenueData}
-                                margin={{ left: 0, right: 0 }}
-                            >
-                                <XAxis dataKey='day' stroke='var(--border)' />
-                                <YAxis stroke='var(--border)' />
+                            <BarChart data={dailyRevenue}>
+                                <CartesianGrid
+                                    strokeDasharray='4 8'
+                                    stroke='var(--border)'
+                                    vertical={false}
+                                />
+                                <XAxis
+                                    dataKey='day'
+                                    tickLine={false}
+                                    axisLine={false}
+                                    stroke='var(--muted-foreground)'
+                                />
+                                <YAxis
+                                    tickLine={false}
+                                    axisLine={false}
+                                    stroke='var(--muted-foreground)'
+                                    tickFormatter={(value) =>
+                                        `${(value / 1_000_000).toFixed(0)}jt`
+                                    }
+                                />
                                 <Tooltip
                                     contentStyle={{
                                         background: "hsl(var(--card))",
                                         border: "1px solid hsl(var(--border))",
                                         borderRadius: "0.75rem",
                                     }}
+                                    formatter={(value) =>
+                                        formatCurrency(value as number)
+                                    }
                                 />
-                                <Line
-                                    type='monotone'
-                                    dataKey='booking'
-                                    stroke='hsl(var(--secondary))'
-                                    strokeWidth={2}
-                                    dot={false}
+                                <Bar
+                                    dataKey='amount'
+                                    fill='hsl(var(--primary))'
+                                    radius={[8, 8, 0, 0]}
                                 />
-                                <Line
-                                    type='monotone'
-                                    dataKey='revenue'
-                                    stroke='hsl(var(--primary))'
-                                    strokeWidth={3}
-                                    dot={false}
-                                />
-                            </RechartLineChart>
+                            </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
                 </Card>
 
-                <Card className='border-border/50 shadow-sm'>
+                <Card className='border-border/50'>
                     <CardHeader>
-                        <CardTitle className='text-xl font-semibold'>
-                            Rekap cabang (70/30)
-                        </CardTitle>
+                        <CardTitle>Booking per hari</CardTitle>
                         <CardDescription>
-                            Komisi otomatis berdasarkan pendapatan kotor.
+                            Jumlah pelanggan 7 hari terakhir
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className='overflow-x-auto'>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Cabang</TableHead>
-                                    <TableHead>Booking</TableHead>
-                                    <TableHead>Pendapatan kotor</TableHead>
-                                    <TableHead>Komisi 30%</TableHead>
-                                    <TableHead>Payout owner</TableHead>
+                    <CardContent className='h-[240px]'>
+                        <ResponsiveContainer width='100%' height='100%'>
+                            <BarChart data={dailyBooking}>
+                                <CartesianGrid
+                                    strokeDasharray='4 8'
+                                    stroke='var(--border)'
+                                    vertical={false}
+                                />
+                                <XAxis
+                                    dataKey='day'
+                                    tickLine={false}
+                                    axisLine={false}
+                                    stroke='var(--muted-foreground)'
+                                />
+                                <YAxis
+                                    tickLine={false}
+                                    axisLine={false}
+                                    stroke='var(--muted-foreground)'
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        background: "hsl(var(--card))",
+                                        border: "1px solid hsl(var(--border))",
+                                        borderRadius: "0.75rem",
+                                    }}
+                                    formatter={(value) => `${value} booking`}
+                                />
+                                <Bar
+                                    dataKey='count'
+                                    fill='hsl(var(--chart-2))'
+                                    radius={[8, 8, 0, 0]}
+                                />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* All branches table */}
+            <Card className='border-border/50'>
+                <CardHeader>
+                    <CardTitle>Detail per cabang</CardTitle>
+                    <CardDescription>
+                        Revenue kotor, platform fee 10%, dan pendapatan Anda
+                        (90%)
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className='overflow-x-auto'>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Cabang</TableHead>
+                                <TableHead className='text-right'>
+                                    Booking
+                                </TableHead>
+                                <TableHead className='text-right'>
+                                    Revenue kotor
+                                </TableHead>
+                                <TableHead className='text-right'>
+                                    Platform fee
+                                </TableHead>
+                                <TableHead className='text-right'>
+                                    Pendapatan Anda
+                                </TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {allBranches.map((branch) => (
+                                <TableRow key={branch.name}>
+                                    <TableCell className='font-semibold'>
+                                        {branch.name}
+                                    </TableCell>
+                                    <TableCell className='text-right'>
+                                        {branch.booking}
+                                    </TableCell>
+                                    <TableCell className='text-right'>
+                                        {formatCurrency(branch.grossRevenue)}
+                                    </TableCell>
+                                    <TableCell className='text-right text-red-600'>
+                                        -{formatCurrency(branch.platformFee)}
+                                    </TableCell>
+                                    <TableCell className='text-right font-bold text-green-600'>
+                                        {formatCurrency(branch.netToOwner)}
+                                    </TableCell>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {reportTable.map((row) => (
-                                    <TableRow key={row.name}>
-                                        <TableCell className='font-semibold text-foreground'>
-                                            {row.name}
-                                        </TableCell>
-                                        <TableCell>{row.booking}</TableCell>
-                                        <TableCell>{row.revenue}</TableCell>
-                                        <TableCell>{row.commission}</TableCell>
-                                        <TableCell className='font-semibold text-foreground'>
-                                            {row.payout}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-
-                <div className='grid gap-5 lg:grid-cols-2'>
-                    <Card className='border-border/50 shadow-sm'>
-                        <CardHeader>
-                            <CardTitle className='text-xl font-semibold'>
-                                Komisi per barber
-                            </CardTitle>
-                            <CardDescription>
-                                Lihat performa individu berdasarkan rating &
-                                omzet.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className='space-y-3 text-sm text-muted-foreground'>
-                            {[
-                                {
-                                    name: "Rama Putra",
-                                    revenue: "Rp 21.3 jt",
-                                    commission: "Rp 6.3 jt",
-                                },
-                                {
-                                    name: "Hafidz Rahman",
-                                    revenue: "Rp 18.1 jt",
-                                    commission: "Rp 5.4 jt",
-                                },
-                                {
-                                    name: "Naya Pratama",
-                                    revenue: "Rp 16.7 jt",
-                                    commission: "Rp 5.0 jt",
-                                },
-                            ].map((item) => (
-                                <div
-                                    key={item.name}
-                                    className='rounded-xl border border-border/40 bg-muted/15 p-4'
-                                >
-                                    <div className='flex items-center justify-between'>
-                                        <span className='font-semibold text-foreground'>
-                                            {item.name}
-                                        </span>
-                                        <Badge
-                                            variant='outline'
-                                            className='border-border/50 text-[10px] uppercase tracking-widest'
-                                        >
-                                            70% payout
-                                        </Badge>
-                                    </div>
-                                    <p>Omzet: {item.revenue}</p>
-                                    <p>Payout: {item.commission}</p>
-                                </div>
                             ))}
-                        </CardContent>
-                    </Card>
-                    <Card className='border-border/50 shadow-sm'>
-                        <CardHeader>
-                            <CardTitle className='text-xl font-semibold'>
-                                Penutup buku otomatis
-                            </CardTitle>
-                            <CardDescription>
-                                Ideal untuk finance yang perlu laporan
-                                terjadwal.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className='space-y-4 text-sm text-muted-foreground'>
-                            <div className='rounded-xl border border-border/40 bg-muted/15 p-4'>
-                                <p className='text-xs uppercase tracking-widest text-muted-foreground'>
-                                    Integrasi
-                                </p>
-                                <p className='text-lg font-bold text-foreground'>
-                                    API laporan keuangan
-                                </p>
-                                <p>
-                                    Sinkron ke Accurate / Mekari / Google Sheet
-                                </p>
-                            </div>
-                            <div className='rounded-xl border border-border/40 bg-muted/15 p-4'>
-                                <p className='text-xs uppercase tracking-widest text-muted-foreground'>
-                                    Auto email
-                                </p>
-                                <p className='text-lg font-bold text-foreground'>
-                                    Senin & Kamis • 09:00 WIB
-                                </p>
-                                <p>Finance@trimtime.com</p>
-                            </div>
-                            <Button className='w-full gap-2'>
-                                <Wallet className='h-4 w-4' />
-                                Aktifkan payout otomatis
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </div>
+                            <TableRow className='bg-muted/50 font-bold'>
+                                <TableCell>TOTAL</TableCell>
+                                <TableCell className='text-right'>
+                                    {totalBooking}
+                                </TableCell>
+                                <TableCell className='text-right'>
+                                    {formatCurrency(totalGrossRevenue)}
+                                </TableCell>
+                                <TableCell className='text-right text-red-600'>
+                                    -{formatCurrency(totalPlatformFee)}
+                                </TableCell>
+                                <TableCell className='text-right text-green-600'>
+                                    {formatCurrency(totalNetToOwner)}
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
 
-                <Card className='border-border/50 shadow-sm'>
-                    <CardHeader>
-                        <CardTitle className='text-xl font-semibold'>
-                            TrimTime Premium insight
+            {/* Insights */}
+            <Card className='border-yellow-300 bg-yellow-50'>
+                <CardHeader>
+                    <div className='flex items-center gap-2'>
+                        <TrendingDown className='h-5 w-5 text-yellow-600' />
+                        <CardTitle className='text-yellow-900'>
+                            Yang perlu perhatian
                         </CardTitle>
-                        <CardDescription>
-                            Analitik tambahan untuk premium owner.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className='grid gap-4 sm:grid-cols-3'>
-                        {[
-                            {
-                                label: "Repeat vs new customer",
-                                value: "62% repeat",
-                            },
-                            {
-                                label: "Utilisasi kursi",
-                                value: "78% rata-rata",
-                            },
-                            { label: "Pelanggan loyal", value: "1.480 poin" },
-                        ].map((item) => (
-                            <div
-                                key={item.label}
-                                className='rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4'
-                            >
-                                <p className='text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2'>
-                                    <Percent className='h-3.5 w-3.5 text-primary' />
-                                    {item.label}
+                    </div>
+                    <CardDescription className='text-yellow-700'>
+                        Berdasarkan data minggu ini
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-3'>
+                    <div className='rounded-lg border border-yellow-300 bg-white p-4'>
+                        <p className='font-semibold text-foreground'>
+                            Cabang BSD pendapatan turun 8%
+                        </p>
+                        <p className='text-sm text-muted-foreground'>
+                            Pendapatan minggu ini: Rp 56,1 jt (minggu lalu: Rp 61
+                            jt). Booking turun dari 305 → 280.
+                        </p>
+                        <Button size='sm' className='mt-3' asChild>
+                            <a href='/owner/promo'>
+                                <ArrowRight className='h-4 w-4' />
+                                Kirim promo ke area BSD
+                            </a>
+                        </Button>
+                    </div>
+
+                    <div className='rounded-lg border border-yellow-300 bg-white p-4'>
+                        <p className='font-semibold text-foreground'>
+                            Hari Minggu pendapatan terendah
+                        </p>
+                        <p className='text-sm text-muted-foreground'>
+                            Minggu: Rp 24,8 jt vs Sabtu: Rp 37,4 jt (turun 34%).
+                            Pertimbangkan promo khusus Minggu.
+                        </p>
+                        <Button size='sm' variant='outline' className='mt-3'>
+                            Lihat detail
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Recommendations */}
+            <Card className='border-border/50'>
+                <CardHeader>
+                    <CardTitle>Rekomendasi untuk meningkatkan pendapatan</CardTitle>
+                    <CardDescription>
+                        Berdasarkan analisis data Anda
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-3'>
+                    <div className='rounded-lg border border-border/40 bg-muted/20 p-4'>
+                        <div className='flex items-start gap-3'>
+                            <Badge className='bg-primary/15 text-primary'>
+                                1
+                            </Badge>
+                            <div className='flex-1'>
+                                <p className='font-semibold text-foreground'>
+                                    Fokus marketing ke SCBD & Menteng
                                 </p>
-                                <p className='text-2xl font-bold text-foreground'>
-                                    {item.value}
+                                <p className='text-sm text-muted-foreground'>
+                                    2 cabang ini paling produktif (Rp 88 jt dan
+                                    Rp 75 jt per minggu). Alokasikan budget ads
+                                    lebih banyak ke area ini.
+                                </p>
+                                <p className='mt-2 text-xs text-green-600'>
+                                     Potensi impact: +Rp 10-15 jt/bulan
                                 </p>
                             </div>
-                        ))}
-                    </CardContent>
-                </Card>
-            </main>
+                        </div>
+                    </div>
+
+                    <div className='rounded-lg border border-border/40 bg-muted/20 p-4'>
+                        <div className='flex items-start gap-3'>
+                            <Badge className='bg-primary/15 text-primary'>
+                                2
+                            </Badge>
+                            <div className='flex-1'>
+                                <p className='font-semibold text-foreground'>
+                                    Evaluasi kinerja cabang BSD & Surabaya
+                                </p>
+                                <p className='text-sm text-muted-foreground'>
+                                    Pendapatan terendah (Rp 56 jt dan Rp 49 jt).
+                                    Cek: apakah lokasi kurang strategis, kompetisi
+                                    tinggi, atau marketing kurang.
+                                </p>
+                                <p className='mt-2 text-xs text-yellow-600'>
+                                     Perlu action dalam 2 minggu
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className='rounded-lg border border-border/40 bg-muted/20 p-4'>
+                        <div className='flex items-start gap-3'>
+                            <Badge className='bg-primary/15 text-primary'>
+                                3
+                            </Badge>
+                            <div className='flex-1'>
+                                <p className='font-semibold text-foreground'>
+                                    Tambah slot booking Jumat & Sabtu
+                                </p>
+                                <p className='text-sm text-muted-foreground'>
+                                    Weekend adalah hari tersibuk (156-170
+                                    booking). Tambah 2-3 barber shift untuk
+                                    capture demand lebih banyak.
+                                </p>
+                                <p className='mt-2 text-xs text-green-600'>
+                                     Potensi impact: +Rp 8-12 jt/bulan
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </PageShell>
     );
 }
