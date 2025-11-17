@@ -276,12 +276,13 @@ export const statusActions: Record<
     ],
 };
 
+
 export type BookingTimelineEntry = {
     time: string;
     title: string;
     description: string;
     icon: LucideIcon;
-    status?: "upcoming";
+    status?: "upcoming" | "completed"; // <-- TAMBAHKAN | "completed"
 };
 
 export type BookingDetail = {

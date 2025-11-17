@@ -46,8 +46,9 @@ const onboardingSteps = [
     },
 ] as const;
 
+
 type AdminIklanCreatePageProps = {
-    searchParams?: Record<string, string | undefined>;
+    searchParams?: { [key: string]: string | string[] | undefined };
 };
 
 export default function AdminIklanCreatePage({
