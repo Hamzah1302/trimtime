@@ -433,9 +433,13 @@ export default function Home() {
             {/* Kolom Visual (Placeholder Slideshow) */}
             <div className="relative h-[400px] lg:h-[500px] w-full bg-slate-200 rounded-xl overflow-hidden shadow-xl border border-blue-200">
               <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700">
-                <p className="text-center text-lg font-semibold px-4">
-                  [Tempat untuk Slideshow Gambar Aplikasi]
-                </p>
+                <Image
+                src="/asset/Rekomendas.jpg" // Ganti dengan nama file Anda
+                alt="Tampilan Aplikasi TrimTime"
+                layout="fill"
+                objectFit="cover"
+                priority // 'priority' bagus untuk gambar di hero section
+                />
               </div>
             </div>
           </div>
