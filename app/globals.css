@@ -10,8 +10,10 @@
     --card-foreground: oklch(0.15 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.15 0 0);
-    --primary: oklch(0.5961 0.2245 264.0524);
-    --primary-foreground: oklch(0.99 0 0);
+
+        /* MENJADI INI */
+    --primary: oklch(0.75 0.18 85); /* Emas Cerah dan Jelas */
+    --primary-foreground: oklch(0.15 0 0); /* Teks Hitam (agar terbaca di atas tombol emas) */
     --secondary: oklch(0.9608 0.0078 264.5419);
     --secondary-foreground: oklch(0.15 0 0);
     --muted: oklch(0.9608 0.0078 264.5419);
@@ -70,8 +72,11 @@
     --card-foreground: oklch(0.9804 0 0);
     --popover: oklch(0.1765 0 0);
     --popover-foreground: oklch(0.9804 0 0);
-    --primary: oklch(0.6667 0.2157 264.0524);
-    --primary-foreground: oklch(0.1373 0 0);
+  
+        /* MENJADI INI */
+    --primary: oklch(0.75 0.18 85); /* Emas Cerah dan Jelas */
+    --primary-foreground: oklch(0.15 0 0); /* Teks Hitam (untuk di atas tombol emas) */
+
     --secondary: oklch(0.2157 0 0);
     --secondary-foreground: oklch(0.9804 0 0);
     --muted: oklch(0.2157 0 0);
